@@ -34,6 +34,7 @@ function handler.connect(fd, addr)
 		ip = addr,
 	}
 	connection[fd] = c
+	print("handler connect")
 	skynet.send(watchdog, "lua", "socket", "open", fd, addr)
 end
 
@@ -54,6 +55,8 @@ local function close_fd(fd)
 end
 
 function handler.disconnect(fd)
+
+	print("handler disconnect")
 	close_fd(fd)
 	skynet.send(watchdog, "lua", "socket", "close", fd)
 end

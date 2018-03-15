@@ -15,6 +15,7 @@ local request = host:attach(sproto.new(proto.c2s))
 local fd = assert(socket.connect("127.0.0.1", 8888))
 
 local function send_package(fd, pack)
+	print("send_package")
 	local package = string.pack(">s2", pack)
 	socket.send(fd, package)
 end
@@ -99,17 +100,17 @@ local function dispatch_package()
 end
 
 send_request("handshake")
-send_request("set", { what = "hello", value = "world" })
-while true do
-	dispatch_package()
-	local cmd = socket.readstdin()
-	if cmd then
-		if cmd == "quit" then
-			send_request("quit")
-		else
-			send_request("get", { what = cmd })
-		end
-	else
-		socket.usleep(100)
-	end
-end
+-- send_request("set", { what = "hello", value = "world" })
+-- while true do
+-- 	dispatch_package()
+-- 	local cmd = socket.readstdin()
+-- 	if cmd then
+-- 		if cmd == "quit" then
+-- 			send_request("quit")
+-- 		else
+-- 			send_request("get", { what = cmd })
+-- 		end
+-- 	else
+-- 		socket.usleep(100)
+-- 	end
+-- end

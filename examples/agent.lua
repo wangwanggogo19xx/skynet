@@ -32,6 +32,7 @@ function REQUEST:quit()
 end
 
 local function request(name, args, response)
+	print("request==agent,params name",name)
 	local f = assert(REQUEST[name])
 	local r = f(args)
 	if response then
@@ -51,8 +52,11 @@ skynet.register_protocol {
 		return host:dispatch(msg, sz)
 	end,
 	dispatch = function (_, _, type, ...)
+		print(type.."----agent",...)
+
 		if type == "REQUEST" then
 			local ok, result  = pcall(request, ...)
+			print(ok,result)
 			if ok then
 				if result then
 					send_package(result)
@@ -80,7 +84,7 @@ function CMD.start(conf)
 			skynet.sleep(500)
 		end
 	end)
-
+	-- print("CMD.start")
 	client_fd = fd
 	skynet.call(gate, "lua", "forward", fd)
 end
@@ -92,6 +96,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
+		print(command.."=====agent")
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

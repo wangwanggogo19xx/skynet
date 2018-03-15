@@ -1,4 +1,4 @@
-local skynet = require "skynet"
+ local skynet = require "skynet"
 local socket = require "skynet.socket"
 local httpd = require "http.httpd"
 local sockethelper = require "http.sockethelper"
