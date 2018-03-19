@@ -41,10 +41,13 @@ local function request(name, args, response)
 end
 
 local function send_package(pack)
+	print(pack)
 	local package = string.pack(">s2", pack)
 	socket.write(client_fd, package)
 end
 
+-- after gateserver.openclient(fd) be called
+-- this would be touched
 skynet.register_protocol {
 	name = "client",
 	id = skynet.PTYPE_CLIENT,
@@ -59,6 +62,7 @@ skynet.register_protocol {
 			print(ok,result)
 			if ok then
 				if result then
+					print(result)
 					send_package(result)
 				end
 			else

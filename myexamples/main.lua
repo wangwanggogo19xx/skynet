@@ -1,10 +1,23 @@
 local skynet = require "skynet"
+local sprotoloader = require "sprotoloader"
 
--- 启动服务(启动函数)
+local max_client = 64
+
 skynet.start(function()
-    -- 启动函数里调用Skynet API开发各种服务
-    print("======Server start=======")
-
-    skynet.newservice("socket")
-    skynet.exit()
+	skynet.error("Server start")
+	skynet.uniqueservice("protoloader")
+	if not skynet.getenv "daemon" then
+		local console = skynet.newservice("console")
+	end
+	skynet.newservice("debug_console",8001)
+	
+	-- local watchdog = skynet.newservice("watchdog")
+	-- skynet.call(watchdog, "lua", "start", {
+	-- 	port = 8888,
+	-- 	maxclient = max_client,
+	-- 	nodelay = true,
+	-- })
+	
+	skynet.error("Watchdog listen on", 8888)
+	skynet.exit()
 end)
