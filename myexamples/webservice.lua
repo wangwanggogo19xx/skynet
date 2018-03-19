@@ -9,46 +9,32 @@ local string = string
 local mode = ...
 if mode == "agent" then
 
-local function response(id, ...)
-	local ok, err = httpd.write_response(sockethelper.writefunc(id), ...)
-	if not ok then
-		-- if err == sockethelper.socket_error , that means socket closed.
-		skynet.error(string.format("fd = %d, %s", id, err))
-	end
-end
-
 skynet.start(function()
+	local httpservice = skynet.newservice("httpservice")
+	
 	skynet.dispatch("lua", function (_,_,id)
 		socket.start(id)
 		-- limit request body size to 8192 (you can pass nil to unlimit)
 		local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 8192)
-		print("body==="..body.."code="..code.."method="..method)
 		if code then
 			if code ~= 200 then
-				response(id, code)
+				-- response(id, code)
+				skynet.send(httpservice,"lua",id,"http","error",code)
 			else
-				print(code)
+				local i = 1
 				local tmp = {}
-				if header.host then
-					table.insert(tmp, string.format("host: %s", header.host))
+				for k in string.gmatch(url, "/(%w+)") do
+					tmp[i] = k
+					print(k)
+					i = i + 1
 				end
-				local path, query = urllib.parse(url)
-				--print(path.."===query:"..query)
-				table.insert(tmp, string.format("path: %s", path))
-				if query then
-					local q = urllib.parse_query(query)
-					for k, v in pairs(q) do
-						table.insert(tmp, string.format("query: %s= %s", k,v))
+				data = {}
+				if body then
+					for k,v in string.gmatch(body, "(%w+)=(%w+)") do
+					    data[k]=v
 					end
 				end
-				table.insert(tmp, "-----header----")
-				for k,v in pairs(header) do
-					table.insert(tmp, string.format("%s = %s",k,v))
-				end
-				table.insert(tmp, "-----body----\n" .. body)
-				res = skynet.call(skynet.newservice("userservice"),"lua","login")
-				print(res)
-				response(id, code, res)
+				skynet.send(httpservice,"lua",id,tmp,data)
 			end
 		else
 			if url == sockethelper.socket_error then
@@ -70,7 +56,7 @@ skynet.start(function()
 	end
 	local balance = 1
 	local id = socket.listen(WEB_LISTENER, WEB_LISTENER_PORT)
-	skynet.error("Listen web port 8000")
+	skynet.error("Listen web port ",8000)
 	socket.start(id , function(id, addr)
 		skynet.error(string.format("%s connected, pass it to agent :%08x", addr, webagent[balance]))
 		skynet.send(webagent[balance], "lua", id)
