@@ -1,20 +1,29 @@
 Rectangle = {area = 0, length = 0, breadth = 0}
 
 -- 派生类的方法 new
-function Rectangle:new (o,length,breadth)
-  o = o or {}
+function Rectangle:new (length,breadth)
+  local o =  {
+		length = length or 0,
+	 	breadth = breadth or 0,
+	  	area = length*breadth
+	}
   setmetatable(o, self)
   self.__index = self
 
-  self.length = length or 0
-  self.breadth = breadth or 0
-  self.area = length*breadth;
+  
   return o
 end
 
 -- 派生类的方法 printArea
-function Rectangle:printArea (a)
-  print("矩形面积为 "..a,self.area)
+function Rectangle:printArea ()
+  print("矩形面积为 ",self.area)
 end
 
-return Rectangle
+r= Rectangle:new(1,2)
+
+print(r:printArea())
+
+b = Rectangle:new(3,6)
+print(b:printArea())
+
+print(r:printArea())
