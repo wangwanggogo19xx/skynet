@@ -2,9 +2,9 @@
 
 -- preload = "./examples/preload.lua"	-- run preload.lua before every lua service run
 
-preload = "./myexamples/conf/config.lua"
+-- preload = "./myexamples/conf/config.lua"
 root = "./"
-luaservice = root.."service/?.lua;"..root.."test/?.lua;"..root.."myexamples/?.lua;"..root.."test/?/init.lua;"..root.."myexamples/user_mgr/?.lua;"..root.."myexamples/service/?.lua;"
+luaservice = root.."service/?.lua;"..root.."test/?.lua;"..root.."myexamples/?.lua;"..root.."test/?/init.lua;"..root.."mahjong/?/?.lua;"
 thread = 8
 logger = nil
 logpath = "."

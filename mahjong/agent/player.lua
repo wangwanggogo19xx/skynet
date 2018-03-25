@@ -106,3 +106,27 @@ skynet.start(function()
 		skynet.ret(skynet.pack(f(...)))
 	end)
 end)
+
+
+-- local M = {}
+-- function M:new(agent)
+-- 	local 0 = {
+-- 		agent = agent,
+-- 		room_mgr = nil,
+-- 		room = nil,
+-- 	}
+
+-- 	setmetatable(o,self)		
+-- 	self.__index = self	
+-- 	return o
+-- end
+
+-- function M:player_join( player )
+-- 	print(player,"join")
+-- end
+
+-- function M:player_leave( player )
+-- 	print(player,"leave")
+-- end
+
+-- return M
