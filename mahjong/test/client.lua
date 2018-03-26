@@ -99,18 +99,18 @@ local function dispatch_package()
 	end
 end
 
-send_request("handshake")
-send_request("set", { what = "hello", value = "world" })
-while true do
-	dispatch_package()
-	local cmd = socket.readstdin()
-	if cmd then
-		if cmd == "quit" then
-			send_request("quit")
-		else
-			send_request("get", { what = cmd })
-		end
-	else
-		socket.usleep(100)
-	end
-end
+send_request("join_room",{room_id = "11"})
+-- send_request("set", { what = "hello", value = "world" })
+-- while true do
+-- 	dispatch_package()
+-- 	local cmd = socket.readstdin()
+-- 	if cmd then
+-- 		if cmd == "quit" then
+-- 			send_request("quit")
+-- 		else
+-- 			send_request("get", { what = cmd })
+-- 		end
+-- 	else
+-- 		socket.usleep(100)
+-- 	end
+-- end

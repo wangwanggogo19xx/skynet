@@ -3,6 +3,7 @@ local netpack = require "skynet.netpack"
 local socket = require "skynet.socket"
 local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
+local p =  require "player"
 
 local WATCHDOG
 local host
@@ -11,6 +12,8 @@ local send_request
 local CMD = {}
 local REQUEST = {}
 local client_fd
+local player
+
 
 function REQUEST:get()
 	print("get", self.what)
@@ -32,13 +35,14 @@ function REQUEST:quit()
 end
 
 local function request(name, args, response)
-	print("request==agent,params name",name)
+	print("request==agent,params name",name,args,response)
 	local f = assert(REQUEST[name])
 	local r = f(args)
 	if response then
 		return response(r)
 	end
 end
+
 
 local function send_package(pack)
 	print(pack)
@@ -83,14 +87,10 @@ function CMD.start(conf)
 	-- slot 1,2 set at main.lua
 	host = sprotoloader.load(1):host "package"
 	send_request = host:attach(sprotoloader.load(2))
-	-- skynet.fork(function()
-	-- 	while true do
-	-- 		send_package(send_request "heartbeat")
-	-- 		skynet.sleep(500)
-	-- 	end
-	-- end)
-	-- print("CMD.start")
+
 	client_fd = fd
+
+	player = p:new(fd)
 	skynet.call(gate, "lua", "forward", fd)
 end
 
