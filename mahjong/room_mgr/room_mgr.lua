@@ -25,3 +25,7 @@ end
 M:start()
 
 return M
+
+-- skynet.start(function( ... )
+-- 	-- body
+-- end)

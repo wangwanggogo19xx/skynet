@@ -17,6 +17,13 @@ skynet.start(function()
 		maxclient = max_client,
 		nodelay = true,
 	})
+
+	skynet.newservice("room_mgr")
+	skynet.call("room_mgr","lua","start")
 	skynet.error("Watchdog listen on", 8888)
+
+
+
+	
 	skynet.exit()
 end)

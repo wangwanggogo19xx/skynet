@@ -1,6 +1,10 @@
 root = "./"
-luaservice = root.."service/?.lua;"..root.."test/?.lua;"..root.."test/?/init.lua;"..root.."mahjong/?.lua;"..root.."mahjong/?/?.lua"
+luaservice = root.."service/?.lua;"..root.."test/?.lua;"..root.."test/?/init.lua"
 lualoader = root .. "lualib/loader.lua"
 lua_path = root.."lualib/?.lua;"..root.."lualib/?/init.lua"
 lua_cpath = root .. "luaclib/?.so"
 snax = root.."examples/?.lua;"..root.."test/?.lua"
+
+--our service
+luaservice = root.."mahjong/?.lua;"..root.."mahjong/?/main.lua;"..luaservice
+lua_path = root.."mahjong/?/?.lua;"..root.."mahjong/?.lua;"..lua_path

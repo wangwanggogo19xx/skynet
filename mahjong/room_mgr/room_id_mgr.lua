@@ -12,10 +12,9 @@ function id_mgr:gen_id()
 		if not self.id[i] then
 			self.id[i]  = true
 			return i
+		end
 	end
 	return false
-
-
 end
 
 return id_mgr

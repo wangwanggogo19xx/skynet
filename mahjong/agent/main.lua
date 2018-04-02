@@ -3,7 +3,6 @@ local netpack = require "skynet.netpack"
 local socket = require "skynet.socket"
 local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
-local p =  require "player"
 
 local WATCHDOG
 local host
@@ -12,8 +11,7 @@ local send_request
 local CMD = {}
 local REQUEST = {}
 local client_fd
-local player
-
+local service 
 
 function REQUEST:get()
 	print("get", self.what)
@@ -22,8 +20,10 @@ function REQUEST:get()
 end
 
 function REQUEST:set()
-	print("set", self.what, self.value)
-	local r = skynet.call("SIMPLEDB", "lua", "set", self.what, self.value)
+	print("get", self.what,self.value)
+	skynet.call(service,"lua",self.what,self.value)
+	-- local f = assert(player[self.what])
+	-- f(player,self.value)
 end
 
 function REQUEST:handshake()
@@ -90,7 +90,11 @@ function CMD.start(conf)
 
 	client_fd = fd
 
-	player = p:new(fd)
+	-- player = p:new(fd)
+	-- player:player_join("12")
+	service = skynet.newservice("player_mgr",fd)
+	skynet.send(service,"lua","service_addr",service)
+
 	skynet.call(gate, "lua", "forward", fd)
 end
 
@@ -105,4 +109,5 @@ skynet.start(function()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)
+	-- skynet.register("agent")
 end)

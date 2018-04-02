@@ -84,5 +84,10 @@ function M:join(player)
 		end
 	end
 end
+
+local m1 = M:new()
+
+local m2 = M:new()
+print(m1~=m2)
 return M
 

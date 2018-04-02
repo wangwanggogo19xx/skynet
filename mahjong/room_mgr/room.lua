@@ -14,6 +14,7 @@ function M:new(room_id)
 end
 
 function M:join(player ,seat)
+
 	local succeed = false
 	local info = ""
 	if seat then
@@ -27,21 +28,23 @@ function M:join(player ,seat)
 		end	
 	else
 		for i=1,#self.players do
-			if self.players[i] then
+			if not self.players[i] then
 				self.players[i]  = player
 				succeed = true	
-				info = player.."'s seat is "..seat			
+				seat = i
+				
+				break		
 			end
 		end	
 		info = "no available seat "
 	end	
-
 	-- 通知其余玩家，有玩家进入
 	if succeed then
+		info = player.client_fd.."'s seat is "..seat	
 		player.room  = self
 		for i=1,#self.players do
-			if self.players[i] and self.player[i] ~= player then
-				self.players[i]:player_join(player)	
+			if self.players[i] and not rawequal(player,self.players[i]) then
+				skynet.call(self.players[i].service_addr,"lua","player_join",player.client_fd)
 			end
 		end	
 	end
@@ -60,7 +63,7 @@ function M:leave( player )
 	-- 通知其余玩家，有玩家退出
 	if succeed then
 		for i=1,#self.players do
-			if self.players[i] and self.players[i] ~= player then
+			if self.players[i] and not rawequal(player,self.players[i]) then
 				self.players[i]:player_leave(player)
 			end
 		end	
@@ -68,3 +71,20 @@ function M:leave( player )
 
 	return false
 end
+
+function M:is_full()
+	for i=1,#self.players do
+		if not self.players[i] then
+			return false
+		end
+	end
+	return true
+	-- body
+end
+
+function M:__tostring()
+	return self.id..""
+	-- body
+end
+return M
+-- skynet.start()
