@@ -17,30 +17,9 @@ function CMD.start()
 end
 
 
-function CMD.join_room(player,room_id,seat)
+function CMD.add_player(player,room_id,seat)
 	local id = tonumber(room_id)
-	
-	if id then
-		print(rooms[id]:is_full())
-		if not rooms[id]:is_full() then
-			succeed ,info = rooms[id]:join(player,seat)
-			print(succeed ,info)
-			return true
-		end
-		return false
-	else
-		for i =1,#rooms do
-			if not rooms[i]:is_full() then
-
-				rooms[i]:join(player,seat)
-				skynet.error("进入房间")
-				return true
-			end
-		end
-		return false	
-	end
-
-	return false		
+	return rooms[id]:add_player(player,seat)
 end
 
 skynet.start(function()
@@ -49,7 +28,7 @@ skynet.start(function()
 		-- body
 		local f = CMD[cmd]
 
-		f(...)
+		skynet.ret(skynet.pack(f(...)))
 
 	end)
 	skynet.register("room_mgr")

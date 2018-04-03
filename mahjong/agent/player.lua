@@ -4,15 +4,12 @@ local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
 
 local M = {}
-
-local host = sprotoloader.load(1):host "package"
-local send_request
-
-function M:new(fd)
+function M:new(fd,agent)
 	local o = {
 		room_mgr = nil,
 		room = nil,
-		client_fd = fd,
+		agent = agent,
+		name = os.time(),
 		-- send_request = host:attach(sprotoloader.load(2)),		
 	}
 
@@ -26,22 +23,26 @@ function M:send_package(pack)
 	local package = string.pack(">s2", pack)
 	socket.write(self.client_fd, package)
 end
-
-function M:player_join( player )
+function M:request(name,agrs,session)
 	local host = sprotoloader.load(1):host "package"
-	local send_request = host:attach(sprotoloader.load(2))
-	-- print(player,"join")
-	self:send_package(send_request "heartbeat" )
+	local request = host:attach(sprotoloader.load(2))
+	return request(name,agrs,session)
 end
+
+
+function M:player_join(player)
+	local str = self:request("set", { what="player_join",value={a="12",b="34"}})
+	self:send_package(str)
+end
+
 
 function M:player_leave( player )
 	print(player,"leave")
 end
 
-function M:join_room(...)
-
-	skynet.call("room_mgr","lua","join_room",self,...)
-	skynet.error("join room :",room_id)
+function M:join_room(room_id)
+	return skynet.call("room_mgr","lua","add_player",self,room_id)
+	-- skynet.error("join room :",room_id)
 end
 
 function M:service_addr( addr)

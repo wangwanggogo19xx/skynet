@@ -3,6 +3,7 @@ local netpack = require "skynet.netpack"
 local socket = require "skynet.socket"
 local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
+local p = require "player"
 
 local WATCHDOG
 local host
@@ -12,6 +13,8 @@ local CMD = {}
 local REQUEST = {}
 local client_fd
 local service 
+local player 
+
 
 function REQUEST:get()
 	print("get", self.what)
@@ -19,9 +22,23 @@ function REQUEST:get()
 	return { result = r }
 end
 
+function REQUEST:login()
+
+	if self.username == "1" and self.password == "1" then
+		player = p:new(client_fd,skynet.self())
+		return {succeed=1,error=""}
+	else
+		return {succeed=0,error="invalid username or password"}
+	end
+end
+function REQUEST:join_room()
+	local succeed,seat,err,room_id = player:join_room(self.room_id,self.seat)
+	return {succeed=succeed,seat=seat,info=err,room=room_id}
+	-- body
+end
 function REQUEST:set()
-	print("get", self.what,self.value)
-	skynet.call(service,"lua",self.what,self.value)
+	-- print("get", self.what,self.value)
+	-- skynet.call(service,"lua",self.what,self.value)
 	-- local f = assert(player[self.what])
 	-- f(player,self.value)
 end
@@ -38,6 +55,7 @@ local function request(name, args, response)
 	print("request==agent,params name",name,args,response)
 	local f = assert(REQUEST[name])
 	local r = f(args)
+	print(r)
 	if response then
 		return response(r)
 	end
@@ -66,7 +84,6 @@ skynet.register_protocol {
 			print(ok,result)
 			if ok then
 				if result then
-					print(result)
 					send_package(result)
 				end
 			else
@@ -101,6 +118,11 @@ end
 function CMD.disconnect()
 	-- todo: do something before exit
 	skynet.exit()
+end
+
+function CMD.notify(...)
+	local str = send_request("player_join",{player=player.name})
+	send_package(str)
 end
 
 skynet.start(function()

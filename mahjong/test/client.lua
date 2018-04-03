@@ -36,7 +36,9 @@ end
 local function recv_package(last)
 	local result
 	result, last = unpack_package(last)
+
 	if result then
+
 		return result, last
 	end
 	local r = socket.recv(fd)
@@ -61,7 +63,7 @@ end
 local last = ""
 
 local function print_request(name, args)
-	print("REQUEST", name)
+	print("REQUEST", name,args)
 	if args then
 		for k,v in pairs(args) do
 			print(k,v)
@@ -101,7 +103,8 @@ local function dispatch_package()
 end
 
 -- send_request("join_room",{room_id = "11"})
-send_request("set", { what = "join_room", value = "11" })
+send_request("login", { username = "1", password = "1" })
+send_request("join_room", { room_id = "1" })
 while true do
 	dispatch_package()
 	local cmd = socket.readstdin()
