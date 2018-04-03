@@ -41,8 +41,11 @@ function M:player_leave( player )
 	print(player,"leave")
 end
 
-function M:join_room(room_id)
-	return skynet.call("room_mgr","lua","add_player",self,room_id)
+function M:join_room(room_mgr)
+	if not room_mgr then
+		room_mgr = skynet.call("area_mgr",random_room)
+	end
+	return skynet.call(room_mgr,"lua","add_player",self)
 	-- skynet.error("join room :",room_id)
 end
 function M:toggle_ready()

@@ -13,7 +13,6 @@ skynet.start(function()
 	skynet.dispatch("lua",function (_, session, cmd, ...)
 		local f = CMD[cmd]
 		skynet.ret(skynet.pack(f(...)))
-
 	end)			
 	skynet.error("create room")
 end)
