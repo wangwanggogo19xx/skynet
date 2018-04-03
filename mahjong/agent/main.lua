@@ -36,6 +36,9 @@ function REQUEST:join_room()
 	return {succeed=succeed,seat=seat,info=err,room=room_id}
 	-- body
 end
+function REQUEST:toggle_ready()
+
+end
 function REQUEST:set()
 	-- print("get", self.what,self.value)
 	-- skynet.call(service,"lua",self.what,self.value)

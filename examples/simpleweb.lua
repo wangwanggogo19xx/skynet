@@ -67,6 +67,7 @@ skynet.start(function()
 	print("SERVICE_NAME=="..SERVICE_NAME)
 	for i= 1, 20 do
 		agent[i] = skynet.newservice(SERVICE_NAME, "agent")
+		
 	end
 	local balance = 1
 	local id = socket.listen("0.0.0.0", 8001)

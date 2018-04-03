@@ -10,6 +10,7 @@ function M:new(fd,agent)
 		room = nil,
 		agent = agent,
 		name = os.time(),
+		ready = false,
 		-- send_request = host:attach(sprotoloader.load(2)),		
 	}
 
@@ -44,7 +45,15 @@ function M:join_room(room_id)
 	return skynet.call("room_mgr","lua","add_player",self,room_id)
 	-- skynet.error("join room :",room_id)
 end
+function M:toggle_ready()
+	self.ready = not self.ready
+	if self.ready then
+		return skynet.call("room_mgr","lua","check_ready",room_id)
+	else
 
+	end
+	-- body
+end
 function M:service_addr( addr)
 	self.service_addr = addr
 end

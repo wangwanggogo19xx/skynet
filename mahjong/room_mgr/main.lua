@@ -16,14 +16,17 @@ function CMD.start()
 	-- body
 end
 
-
-function CMD.add_player(player,room_id,seat)
-	local id = tonumber(room_id)
-	return rooms[id]:add_player(player,seat)
+-- function CMD:( ... )
+-- 	-- body
+-- end
+function CMD.add_player(player,seat)
+	return room:add_player(player,seat)
 end
-
+function CMD.check_ready()
+	return room:check_ready()
+end
 skynet.start(function()
-	
+		
 	skynet.dispatch("lua",function (_, session, cmd, ...)
 		-- body
 		local f = CMD[cmd]
@@ -32,7 +35,6 @@ skynet.start(function()
 
 	end)
 	skynet.register("room_mgr")
-	skynet.error("room_mgr start")
 end)
 
 

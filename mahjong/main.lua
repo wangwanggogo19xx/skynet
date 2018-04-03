@@ -18,8 +18,7 @@ skynet.start(function()
 		nodelay = true,
 	})
 
-	skynet.newservice("room_mgr")
-	skynet.call("room_mgr","lua","start")
+	skynet.newservice("area_mgr")
 	skynet.error("Watchdog listen on", 8888)
 
 

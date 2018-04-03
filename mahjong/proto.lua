@@ -65,6 +65,11 @@ join_room 7 {
 		room 3 : integer
 	}
 }
+
+toggle_ready 8 {
+	
+}
+
 ]]
 
 proto.s2c = sprotoparser.parse [[

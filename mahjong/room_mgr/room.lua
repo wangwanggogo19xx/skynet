@@ -58,12 +58,25 @@ function M:add_player(player,seat)
 		player.room  = self
 		for i=1,#self.players do
 			if self.players[i] and not rawequal(player,self.players[i]) then
+
+				---掉线发生异常
 				skynet.call(self.players[i].agent,"lua","notify",player.name)
 			end
 		end	
 	end
 	print(succeed,seat,info)
-	return succeed,seat,info,room = self.id
+	return succeed,seat,info,self.id
+end
+
+function M:check_ready()
+	if self.player_count == 4 then
+		for i =1,#self.players do
+			if not self.players.ready then
+				return
+			end
+			print("start new game")
+		end
+	end
 end
 
 function M:remove_player( player )
