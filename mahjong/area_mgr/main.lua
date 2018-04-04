@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+require "skynet.manager"
 
 local rooms = {}
 
@@ -14,5 +15,6 @@ skynet.start(function()
 		local f = CMD[cmd]
 		skynet.ret(skynet.pack(f(...)))
 	end)			
+	skynet.register("area_mgr")
 	skynet.error("create room")
 end)

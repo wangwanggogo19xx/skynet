@@ -18,7 +18,7 @@ skynet.start(function()
 		nodelay = true,
 	})
 
-	skynet.newservice("area_mgr")
+	local id =skynet.uniqueservice("area_mgr")
 	skynet.error("Watchdog listen on", 8888)
 
 

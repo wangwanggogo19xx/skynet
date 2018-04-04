@@ -56,8 +56,9 @@ local session = 0
 local function send_request(name, args)
 	session = session + 1
 	local str = request(name, args, session)
+	print(str,"=============")
 	send_package(fd, str)
-	print("Request:", session)
+	-- print("Request:", session)
 end
 
 local last = ""
@@ -80,9 +81,21 @@ local function print_response(session, args)
 	end
 end
 
+local function chupai(name,args,response)
+	print(name,args,response)
+	local ok,result = response({value="11"})
+	print(ok,result)
+	print("my holds is:",args.holds)
+	if args then
+		for k,v in pairs(args) do
+			print(k,v)
+		end
+	end	
+	-- body
+end
 local function print_package(t, ...)
 	if t == "REQUEST" then
-		print_request(...)
+		chupai(...)
 	else
 		assert(t == "RESPONSE")
 		print_response(...)
@@ -104,7 +117,9 @@ end
 
 -- send_request("join_room",{room_id = "11"})
 send_request("login", { username = "1", password = "1" })
-send_request("join_room", { room_id = "1" })
+send_request("join_room", { room_id ,seat })
+-- send_request("toggle_ready")
+send_request("toggle_ready")
 while true do
 	dispatch_package()
 	local cmd = socket.readstdin()

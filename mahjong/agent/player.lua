@@ -4,13 +4,14 @@ local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
 
 local M = {}
-function M:new(fd,agent)
+function M:new(agent)
 	local o = {
 		room_mgr = nil,
-		room = nil,
 		agent = agent,
 		name = os.time(),
 		ready = false,
+		seat = nil,
+		game_mgr= nil,
 		-- send_request = host:attach(sprotoloader.load(2)),		
 	}
 
@@ -31,32 +32,34 @@ function M:request(name,agrs,session)
 end
 
 
-function M:player_join(player)
-	local str = self:request("set", { what="player_join",value={a="12",b="34"}})
-	self:send_package(str)
-end
+-- function M:player_join(player)
+-- 	local str = self:request("set", { what="player_join",value={a="12",b="34"}})
+-- 	self:send_package(str)
+-- end
 
 
 function M:player_leave( player )
 	print(player,"leave")
 end
 
-function M:join_room(room_mgr)
+function M:join_room(room_mgr,seat)
 	if not room_mgr then
-		room_mgr = skynet.call("area_mgr",random_room)
+		room_mgr = skynet.call("area_mgr","lua","random_room")
 	end
-	return skynet.call(room_mgr,"lua","add_player",self)
-	-- skynet.error("join room :",room_id)
-end
-function M:toggle_ready()
-	self.ready = not self.ready
-	if self.ready then
-		return skynet.call("room_mgr","lua","check_ready",room_id)
-	else
+	local succeed,seat,info,room_mgr =  skynet.call(room_mgr ,"lua","add_player",self.agent,seat)
 
+	if succeed then
+		self.room_mgr = room_mgr
+		self.seat = seat
 	end
-	-- body
+	return succeed,seat,info,room_mgr
+
 end
+
+function M:toggle_ready()
+	self.ready,self.game_mgr = skynet.call(self.room_mgr ,"lua","seat_ready",self.seat)
+end
+
 function M:service_addr( addr)
 	self.service_addr = addr
 end

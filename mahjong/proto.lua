@@ -55,7 +55,7 @@ login 6 {
 }
 join_room 7 {
 	request {
-		room_id 0 : integer
+		room_mgr 0 : integer
 		seat 1 : integer
 	}
 	response {
@@ -94,6 +94,24 @@ set 2 {
 player_join 3 {
 	request {
 		player 0 : integer
+	}
+}
+set_holds 4 {
+	request {
+		holds 0 : string
+		dump 1 : string
+		pong 2 : string
+		gong 3 : string
+	}
+}
+
+
+game 5 {
+	request {
+		cmd 1 :string
+	}
+	response {
+		value 1 : integer
 	}
 }
 ]]

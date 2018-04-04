@@ -1,32 +1,36 @@
 local skynet =require "skynet"
 require "skynet.manager"
 
-local room = require "room"
+local r = require "room"
+local room 
 
-local rooms = {}
+-- local rooms = {}
 local CMD = {}
-function CMD.start()
-	for i= 1, 20 do
-		rooms[i] = room:new(i)
+-- function CMD.start()
+-- 	for i= 1, 20 do
+-- 		rooms[i] = room:new(i)
 		
-	end		
-	print(rooms[11])
-	skynet.error("create room")
+-- 	end		
+-- 	print(rooms[11])
+-- 	skynet.error("create room")
 
-	-- body
-end
+-- 	-- body
+-- end
 
 -- function CMD:( ... )
 -- 	-- body
 -- end
-function CMD.add_player(player,seat)
-	return room:add_player(player,seat)
+function CMD.add_player(player_mgr,seat)
+	return room:add_player(player_mgr,seat)
+
 end
-function CMD.check_ready()
-	return room:check_ready()
+function CMD.seat_ready(seat)
+	-- skynet.yield()
+	return room:seat_ready(seat)
 end
 skynet.start(function()
-		
+	room = r:new(skynet.self())
+
 	skynet.dispatch("lua",function (_, session, cmd, ...)
 		-- body
 		local f = CMD[cmd]

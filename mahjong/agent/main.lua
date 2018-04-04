@@ -14,7 +14,7 @@ local REQUEST = {}
 local client_fd
 local service 
 local player 
-
+local session = 100
 
 function REQUEST:get()
 	print("get", self.what)
@@ -25,19 +25,20 @@ end
 function REQUEST:login()
 
 	if self.username == "1" and self.password == "1" then
-		player = p:new(client_fd,skynet.self())
+		player = p:new(skynet.self())
 		return {succeed=1,error=""}
 	else
 		return {succeed=0,error="invalid username or password"}
 	end
 end
 function REQUEST:join_room()
-	local succeed,seat,err,room_id = player:join_room(self.room_id,self.seat)
+	local succeed,seat,err,room_id = player:join_room(self.room_mgr,self.seat)
 	return {succeed=succeed,seat=seat,info=err,room=room_id}
-	-- body
 end
-function REQUEST:toggle_ready()
 
+function REQUEST:toggle_ready()
+	skynet.sleep(20)
+	player:toggle_ready()
 end
 function REQUEST:set()
 	-- print("get", self.what,self.value)
@@ -66,7 +67,6 @@ end
 
 
 local function send_package(pack)
-	print(pack)
 	local package = string.pack(">s2", pack)
 	socket.write(client_fd, package)
 end
@@ -80,8 +80,6 @@ skynet.register_protocol {
 		return host:dispatch(msg, sz)
 	end,
 	dispatch = function (_, _, type, ...)
-		print(type.."----agent",...)
-
 		if type == "REQUEST" then
 			local ok, result  = pcall(request, ...)
 			print(ok,result)
@@ -110,8 +108,7 @@ function CMD.start(conf)
 
 	client_fd = fd
 
-	-- player = p:new(fd)
-	-- player:player_join("12")
+
 	service = skynet.newservice("player_mgr",fd)
 	skynet.send(service,"lua","service_addr",service)
 
@@ -123,8 +120,16 @@ function CMD.disconnect()
 	skynet.exit()
 end
 
+
 function CMD.notify(...)
-	local str = send_request("player_join",{player=player.name})
+	local str = send_request("player_join",{player=...})
+	send_package(str)
+end
+
+
+function CMD.init_holds(holds)
+	local str = send_request("set_holds",{holds=holds},session)
+	session = session +1
 	send_package(str)
 end
 
@@ -134,5 +139,7 @@ skynet.start(function()
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)
+
+	
 	-- skynet.register("agent")
 end)
