@@ -103,6 +103,10 @@ set_holds 4 {
 		pong 2 : string
 		gong 3 : string
 	}
+	response {
+		value 1 : integer
+	}
+
 }
 
 

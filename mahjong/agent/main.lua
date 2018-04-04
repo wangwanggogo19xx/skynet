@@ -91,8 +91,9 @@ skynet.register_protocol {
 				skynet.error(result)
 			end
 		else
-			assert(type == "RESPONSE")
-			error "This example doesn't support request client"
+			print(...)
+			-- assert(type == "RESPONSE")
+			-- error "This example doesn't support request client"
 		end
 	end
 }
@@ -129,7 +130,7 @@ end
 
 function CMD.init_holds(holds)
 	local str = send_request("set_holds",{holds=holds},session)
-	session = session +1
+	session = session +  1
 	send_package(str)
 end
 

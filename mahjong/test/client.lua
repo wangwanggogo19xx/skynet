@@ -83,19 +83,34 @@ end
 
 local function chupai(name,args,response)
 	print(name,args,response)
-	local ok,result = response({value="11"})
-	print(ok,result)
-	print("my holds is:",args.holds)
-	if args then
-		for k,v in pairs(args) do
-			print(k,v)
+	local p =0
+	for i=1,50000 do
+		p = socket.readstdin()
+		
+		if p then
+			 p = tonumber(p)
+			 if p then
+			 	print("you lose ",p)
+			 	break
+			 end
 		end
-	end	
+		socket.usleep(100)
+	end
+	return response({value=p})
+	-- print(ok,result)
+	-- print("my holds is:",args.holds)
+	-- if args then
+	-- 	for k,v in pairs(args) do
+	-- 		print(k,v)
+	-- 	end
+	-- end	
 	-- body
 end
 local function print_package(t, ...)
 	if t == "REQUEST" then
-		chupai(...)
+		local ok,result =pcall(chupai,...)
+		print(ok,result)
+		send_package(fd,result)
 	else
 		assert(t == "RESPONSE")
 		print_response(...)
@@ -122,14 +137,14 @@ send_request("join_room", { room_id ,seat })
 send_request("toggle_ready")
 while true do
 	dispatch_package()
-	local cmd = socket.readstdin()
-	if cmd then
-		if cmd == "quit" then
-			send_request("quit")
-		else
-			send_request("get", { what = cmd })
-		end
-	else
-		socket.usleep(100)
-	end
+	-- local cmd = socket.readstdin()
+	-- if cmd then
+	-- 	if cmd == "quit" then
+	-- 		send_request("quit")
+	-- 	else
+	-- 		send_request("get", { what = cmd })
+	-- 	end
+	-- else
+	-- 	socket.usleep(100)
+	-- end
 end
