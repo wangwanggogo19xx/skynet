@@ -94,6 +94,7 @@ set 2 {
 player_join 3 {
 	request {
 		player 0 : integer
+		seat 1 : integer
 	}
 }
 set_holds 4 {
@@ -104,20 +105,35 @@ set_holds 4 {
 		gong 3 : string
 	}
 	response {
+		cmd 0 : string
 		value 1 : integer
 	}
 
 }
+
 
 
 game 5 {
 	request {
-		cmd 1 :string
+		cmd 0 : string
+		value 1 : string
+		seat 2 : integer
 	}
 	response {
+		cmd 0 : string
 		value 1 : integer
 	}
 }
+
+notification 6 {
+	request {
+		seat 0 : integer
+		cmd 1 : string
+		value 2: integer
+	}
+}
+
 ]]
+-- game 1:弃牌，2：碰，3：杠，4：胡 5，定缺 6：过
 
 return proto

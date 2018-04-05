@@ -5,8 +5,9 @@ local function timeout(t)
 end
 
 local function wakeup(co)
-	for i=1,5 do
+	for i=1,10 do
 		skynet.sleep(50)
+		-- print(i)
 		skynet.wakeup(co)
 	end
 end
@@ -20,13 +21,13 @@ local function test()
 end
 
 skynet.start(function()
-	test()
+	-- test()
 
 	skynet.fork(wakeup, coroutine.running())
-	skynet.timeout(300, function() timeout "Hello World" end)
+	-- skynet.timeout(300, function() timeout "Hello World" end)
 	for i = 1, 10 do
 		print(i, skynet.now())
-		print(skynet.sleep(100))
+		print(skynet.sleep(1000))
 	end
 	skynet.exit()
 	print("Test timer exit")

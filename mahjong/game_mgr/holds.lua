@@ -46,13 +46,11 @@ function M:check_need(p)
 	elseif countP == 2 then
 		self.need[p]="pong"
 	elseif countP == 1 then
-		self.need[p] = nil 
-		
+		self.need[p] = nil 	
 	end
-
 end
 
-function M:lose(p)
+function M:throw(p)
 	print(p)
 	local temp = self.holds[ p // 10+1]
 	temp[p % 10] = temp[p % 10] - 1	
@@ -66,7 +64,7 @@ function M:random_lose()
 	if table_sum(self.holds[self.discard]) > 0 then
 		for i = 1,#self.holds[self.discard] do
 			if self.holds[self.discard][i] ~= 0 then
-				return self:lose( ( self.discard -1) * 10 +i)
+				return self:throw( ( self.discard -1) * 10 +i)
 				
 			end
 		end
@@ -77,7 +75,7 @@ function M:random_lose()
 			for j=1,#self.holds[i] do
 				if self.holds[i][j] > 0 then
 					print((i-1)*10 + j)
-					return self:lose((i-1)*10 + j)
+					return self:throw((i-1)*10 + j)
 				end
 			end
 		end
@@ -85,17 +83,17 @@ function M:random_lose()
 end
 function M:pong(p) --碰
 	if self.need[p] == "pong" or self.need[p] == "gong" then
-		self:lose(p)
-		self:lose(p)
+		self:throw(p)
+		self:throw(p)
 		table.insert(pong,p)
 	end
 end
 
 function M:gong(p ,player) --杠
 	if  self.need[p] == "gong" then
-		self:lose(p)
-		self:lose(p)
-		self:lose(p)
+		self:throw(p)
+		self:throw(p)
+		self:throw(p)
 		self.gong[p] = player.pos
 	end
 end
@@ -115,4 +113,27 @@ function M:__tostring( )
 	return ret
 	-- return os.time()
 end
+
+function M:random_discard()
+	-- 随机为排数最少的一种花色
+	local tep1 = table_sum(self.holds[1])
+	local tep2 = table_sum(self.holds[2])
+	local tep3 = table_sum(self.holds[3])
+
+	if tep1 <= tep2 then
+		if tep1 <= tep3 then
+			self.discard = 1
+		else
+			self.discard = 3
+		end
+	else
+		if tep2 <= tep3 then
+			self.discard = 2
+		else
+			self.discard = 3
+		end		
+	end
+	print("定缺种类为：",self.discard)
+end
+
 return M

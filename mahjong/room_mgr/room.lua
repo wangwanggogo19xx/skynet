@@ -65,7 +65,7 @@ function M:add_player(player_mgr,seat)
 			if self.player_mgrs[i] and not rawequal(player_mgr,self.player_mgrs[i]) then
 
 				---掉线发生异常
-				skynet.call(self.player_mgrs[i],"lua","notify",player_mgr)
+				skynet.call(self.player_mgrs[i],"lua","notify",{cmd = "player_join",value=player_mgr,seat=seat})
 			end
 		end	
 	end
@@ -89,11 +89,15 @@ function M:seat_ready(seat)
 			end
 		end
 		print("start new game")
+
+		gameservice=skynet.newservice("game_mgr")
+		for i=1,#self.player_mgrs do
+			skynet.send(self.player_mgrs[i],"lua","set",{attr="game_mgr",value=gameservice})	
+		end
+		skynet.send(gameservice,"lua","start",self.player_mgrs)		
 	end
 	print("waiting ...")
-	gameservice=skynet.newservice("game_mgr")
-	skynet.send(gameservice,"lua","start",self.player_mgrs)
-	return self.seat_status[seat] == 2,gameservice
+	return self.seat_status[seat] == 2
 end
 
 function M:remove_player( player )

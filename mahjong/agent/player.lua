@@ -57,11 +57,41 @@ function M:join_room(room_mgr,seat)
 end
 
 function M:toggle_ready()
-	self.ready,self.game_mgr = skynet.call(self.room_mgr ,"lua","seat_ready",self.seat)
+	 skynet.call(self.room_mgr ,"lua","seat_ready",self.seat)
+	--  self.ready,self.game_mgr =
+	-- print(self.ready,self.game_mgr,"=========+++++++++++")
+end
+
+function M:lose( p )
+	print(self.game_mgr,p)
+	skynet.call(self.game_mgr,"lua","lose",self.seat,p)
 end
 
 function M:service_addr( addr)
 	self.service_addr = addr
 end
+
+
+--- 玩家对牌的操作
+function M:pass()
+	skynet.call(self.game_mgr,"lua","pass",self.seat)
+end
+function M:pong(p)
+	skynet.call(self.game_mgr,"lua","pong",self.seat,p)
+end
+function M:gong(p)
+	skynet.call(self.game_mgr,"lua","gong",self.seat,p)
+end
+function M:win(p)
+	skynet.call(self.game_mgr,"lua","win",self.seat,p)
+end
+function M:throw(p)
+	skynet.call(self.game_mgr,"lua","throw",self.seat,p)
+end
+function M:set_discard(t )
+	skynet.call(self.game_mgr,"lua","set_discard",self.seat,t)
+end
+
+
 
 return M

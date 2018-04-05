@@ -36,7 +36,6 @@ skynet.start(function()
 		local f = CMD[cmd]
 
 		skynet.ret(skynet.pack(f(...)))
-
 	end)
 	skynet.register("room_mgr")
 end)

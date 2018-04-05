@@ -64,8 +64,29 @@ local function request(name, args, response)
 		return response(r)
 	end
 end
-
-
+local function response(session,args)
+	-- print("RESPONSE",session)
+	-- if args.cmd == 1 then
+	-- 	player:pass()
+	-- else
+	if args.cmd == "set_discard" then
+		player:set_discard(args.value)
+	elseif args.cmd == "throw" then
+		player:throw(args.value)
+	end
+	-- if args then
+	-- 	for k,v in pairs(args) do
+	-- 		print(k,v)
+	-- 	end
+	-- end	
+	-- skynet.wakeup(coroutine.running())
+	-- body
+end
+local RESPONSE={}
+function RESPONSE:lose(p)
+	player:lose(p)
+	-- body
+end
 local function send_package(pack)
 	local package = string.pack(">s2", pack)
 	socket.write(client_fd, package)
@@ -91,9 +112,7 @@ skynet.register_protocol {
 				skynet.error(result)
 			end
 		else
-			print(...)
-			-- assert(type == "RESPONSE")
-			-- error "This example doesn't support request client"
+			response(...)
 		end
 	end
 }
@@ -123,7 +142,7 @@ end
 
 
 function CMD.notify(...)
-	local str = send_request("player_join",{player=...})
+	local str = send_request("notification",...)
 	send_package(str)
 end
 
@@ -132,8 +151,18 @@ function CMD.init_holds(holds)
 	local str = send_request("set_holds",{holds=holds},session)
 	session = session +  1
 	send_package(str)
+	print("be called")	
 end
 
+function CMD.game(...)
+	local str = send_request("game",...,session)
+	session = session +  1
+	send_package(str)	
+end
+function CMD.set( conf )
+	player[conf.attr] = conf.value
+	print(player.game_mgr)
+end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
 		print(command.."=====agent")

@@ -81,36 +81,59 @@ local function print_response(session, args)
 	end
 end
 
-local function chupai(name,args,response)
-	print(name,args,response)
+
+local function input( )
 	local p =0
 	for i=1,50000 do
 		p = socket.readstdin()
-		
 		if p then
-			 p = tonumber(p)
-			 if p then
-			 	print("you lose ",p)
-			 	break
-			 end
+			return p 
 		end
 		socket.usleep(100)
-	end
-	return response({value=p})
-	-- print(ok,result)
-	-- print("my holds is:",args.holds)
-	-- if args then
-	-- 	for k,v in pairs(args) do
-	-- 		print(k,v)
-	-- 	end
-	-- end	
+	end	
+	return nil
+end
+
+local REQUEST = {}
+function REQUEST.set_discard(seat,value,response)
+	print("定缺")
+	local p = input()
+	return response({cmd="set_discard",value=p})
+end
+function REQUEST.get(seat,value,response )
+	return response({cmd="throw",value=11})	
 	-- body
+end
+
+function REQUEST.player_join(seat,value,response )
+	-- return response({cmd="throw",value=11})	
+	-- body
+end
+function REQUEST.throw(seat,value,response )
+	print("player",seat,"thow",value)
+end
+local function request(name,args,response)
+	print(args.cmd)
+	local f = REQUEST[args.cmd]
+	assert(f)
+	local ok,result =  f(args.seat,args.value,response)
+	-- if response then
+	-- 	send_package(fd,result)
+	-- end
+	return ok,result
+
+
 end
 local function print_package(t, ...)
 	if t == "REQUEST" then
-		local ok,result =pcall(chupai,...)
+		local ok,result =pcall(request,...)
 		print(ok,result)
-		send_package(fd,result)
+		-- send_package(fd,result)
+		if ok then
+			if result then
+				send_package(fd,result)
+			end
+		end
 	else
 		assert(t == "RESPONSE")
 		print_response(...)

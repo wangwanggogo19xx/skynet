@@ -19,12 +19,7 @@ function M:next_player(pos)
 	if self.mj.count > 0 then
 		self.players[pos]:get()
 		self.players[pos]:lose(nil)
-		-- 启动一个线程，等待客户端来唤醒，如果15秒内没有被唤醒，自动唤醒
-		-- self.players[pos]:lose()
-		---------------
-		-- if  not self.succeed then
-		-- 	local pai = self.players.lose()
-		-- end
+
 	end
 
 	-- body
