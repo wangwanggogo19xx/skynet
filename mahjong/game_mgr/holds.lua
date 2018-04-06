@@ -34,7 +34,11 @@ function M:add(p)
 	local temp = self.holds[ p // 10+1]
 	temp[p % 10] = temp[p % 10] + 1
 	self:check_need(p)
-	
+end
+function M:has_p(p)
+	-- return  self.holds[p // 10+1][p%10] == nil
+	return true --测试
+	-- body
 end
 
 function M:check_need(p)

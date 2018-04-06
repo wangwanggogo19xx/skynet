@@ -15,7 +15,7 @@ local request = host:attach(sproto.new(proto.c2s))
 local fd = assert(socket.connect("127.0.0.1", 8888))
 
 local function send_package(fd, pack)
-	print("send_package")
+	-- print("send_package")
 	local package = string.pack(">s2", pack)
 	socket.send(fd, package)
 end
@@ -101,7 +101,8 @@ function REQUEST.set_discard(seat,value,response)
 	return response({cmd="set_discard",value=p})
 end
 function REQUEST.get(seat,value,response )
-	return response({cmd="throw",value=11})	
+	print("get card : ",value)
+	return response({cmd="throw",value=value})	
 	-- body
 end
 
@@ -110,10 +111,10 @@ function REQUEST.player_join(seat,value,response )
 	-- body
 end
 function REQUEST.throw(seat,value,response )
-	print("player",seat,"thow",value)
+	print("player",seat,"throw",value)
 end
 local function request(name,args,response)
-	print(args.cmd)
+	-- print(args.cmd)
 	local f = REQUEST[args.cmd]
 	assert(f)
 	local ok,result =  f(args.seat,args.value,response)
@@ -127,7 +128,7 @@ end
 local function print_package(t, ...)
 	if t == "REQUEST" then
 		local ok,result =pcall(request,...)
-		print(ok,result)
+		-- print(ok,result)
 		-- send_package(fd,result)
 		if ok then
 			if result then
