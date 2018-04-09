@@ -85,11 +85,11 @@ end
 function M:win(p)
 	skynet.call(self.game_mgr,"lua","win",self.seat,p)
 end
-function M:throw(p)
-	skynet.call(self.game_mgr,"lua","throw",self.seat,p)
+function M:throw(p,session)
+	skynet.call(self.game_mgr,"lua","throw",self.seat,p,session)
 end
-function M:set_discard(t )
-	skynet.call(self.game_mgr,"lua","set_discard",self.seat,t)
+function M:set_discard(t ,session)
+	skynet.call(self.game_mgr,"lua","set_discard",self.seat,t,session)
 end
 
 

@@ -38,28 +38,4 @@ function M.hu(holds)
 	-- body
 end
 
--- package.path = package.path ..';../?.lua';
--- local holds = require("holds")
--- local h1 = holds:new(nil)
--- local mm = M:new(nil)
-
--- for i=1,13 do
--- 	-- print()
--- 	h1:add(mm:next())
--- end
--- for k,v in pairs(h1.need) do
--- 	print(k,v)
--- end
-
--- for k,v in pairs(h1.holds) do
--- 	-- print(k)
--- 	for i = 1,9 do
--- 		for j = 1 , v[i]  do
--- 			io.write(i + (k-1)*10,",")
--- 			-- print(v[i] + (k-1)*10)
--- 		end
--- 	end
--- 	print()
--- end
-
 return M

@@ -83,8 +83,8 @@ end
 
 
 local function input( )
-	local p =0
-	for i=1,50000 do
+	local p = 0
+	for i=1,5000000 do
 		p = socket.readstdin()
 		if p then
 			return p 
@@ -102,7 +102,9 @@ function REQUEST.set_discard(seat,value,response)
 end
 function REQUEST.get(seat,value,response )
 	print("get card : ",value)
-	return response({cmd="throw",value=value})	
+	local p = input()
+	print(p)
+	return response({cmd="throw",value=p})	
 	-- body
 end
 

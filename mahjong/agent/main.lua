@@ -65,22 +65,13 @@ local function request(name, args, response)
 	end
 end
 local function response(session,args)
-	-- print("RESPONSE",session)
-	-- if args.cmd == 1 then
-	-- 	player:pass()
-	-- else
+	print("game_session",session)
 	if args.cmd == "set_discard" then
-		player:set_discard(args.value)
+		player:set_discard(args.value,session)
 	elseif args.cmd == "throw" then
-		player:throw(args.value)
+		player:throw(args.value,session)
 	end
-	-- if args then
-	-- 	for k,v in pairs(args) do
-	-- 		print(k,v)
-	-- 	end
-	-- end	
-	-- skynet.wakeup(coroutine.running())
-	-- body
+
 end
 local RESPONSE={}
 function RESPONSE:lose(p)
@@ -147,16 +138,15 @@ function CMD.notify(...)
 end
 
 
-function CMD.init_holds(holds)
-	local str = send_request("set_holds",{holds=holds},session)
-	session = session +  1
+function CMD.init_holds(holds,game_session)
+	local str = send_request("set_holds",{holds=holds},game_session)
+	-- session = session +  1
 	send_package(str)
 	print("be called")	
 end
 
-function CMD.game(...)
-	local str = send_request("game",...,session)
-	session = session +  1
+function CMD.game(obj,game_session)
+	local str = send_request("game",obj,game_session)
 	send_package(str)	
 end
 function CMD.set( conf )
