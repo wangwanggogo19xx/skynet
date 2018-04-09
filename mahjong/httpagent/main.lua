@@ -47,6 +47,7 @@ local POST = {}
 function POST.login(id,data)
     local ret = skynet.call("account_mgr","lua","login",data.username,data.password)
     response(id,200, ret)
+    
 end
 
 
