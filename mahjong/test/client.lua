@@ -84,7 +84,7 @@ end
 
 local function input( )
 	local p = 0
-	for i=1,5 do
+	for i=1,50000 do
 		p = socket.readstdin()
 		if p then
 			return p 
@@ -99,6 +99,7 @@ function REQUEST.set_discard(seat,value,response)
 	print("定缺")
 	print(value)
 	local p = input()
+	print(p)
 	if p then
 		return response({cmd="set_discard",value=p})
 	end

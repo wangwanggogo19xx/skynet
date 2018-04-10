@@ -15,6 +15,7 @@ local function wakeup(sec,co)
 	for i=1,sec * 10 do
 		if allow_next then
 			skynet.wakeup(co)
+			print("wakeup===========")
 			return	
 		end	
 		skynet.sleep(10)
@@ -22,10 +23,15 @@ local function wakeup(sec,co)
 end
 
 
+local tt
+
 local function wait( sec,func,...)
+	print(current_session,"===============")
 	allow_next = false
-	skynet.fork(wakeup,sec * 100, coroutine.running())
+	skynet.fork(wakeup,sec , coroutine.running())
 	skynet.sleep(sec * 100)
+	print(current_session,"====================")
+	
 	if not allow_next then
 		print("")
 		print("overtime....")
@@ -55,7 +61,7 @@ end
 
 function M:start()
 	self:init_holds()
-	self:deal()
+	-- self:deal()
 
 end
 
@@ -95,7 +101,11 @@ function M:init_holds()
 			skynet.send(self.player_mgrs[i],"lua","game",{cmd="set_discard",value=self.holds[i]:__tostring()},current_session)
 		end
 	end
-	wait(5,self.random_discard,self)
+	-- skynet.wait()
+	tt = coroutine.running()
+	skynet.sleep(10000)
+	print("111")
+	-- wait(15,self.random_discard,self)
 	-- body
 end
 
@@ -149,12 +159,14 @@ function M:throw(seat,p,session)
 		current_card = self.holds[seat]:throw(p)
 		self.current_seat = seat
 
-		-- 通知其他玩家，当前玩家出牌：p
+		
 		local ok 
 		for i=1,4 do 
 			print("inform seat and throw",seat,p)
+
+			-- 通知其他玩家，当前玩家出牌：p
 			skynet.send(self.player_mgrs[i],"lua","notify",{seat=seat,cmd = "throw",value = p})
-			if  self.holds[i].need[p] then
+			if  i ~= seat and self.holds[i].need[p] then
 				--通知，并等待其他用户可进行的操作
 				print(i,self.holds[i].need[p],p)
 				skynet.send(self.player_mgrs[i],"lua","game",{cmd = self.holds[i].need[p],value = p},current_session)
@@ -178,6 +190,9 @@ end
 
 
 function M:set_discard(seat,t,session)
+	print(tt,coroutine.running())
+	print(seat,t,session)
+	skynet.wakeup(tt)
 	if session == current_session then
 		if not self.holds[seat].discard then
 			if t and t >=1 and t<=3  then
