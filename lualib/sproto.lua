@@ -195,7 +195,7 @@ local function gen_response(self, response, session)
 end
 
 function host:dispatch(...)
-	print(...)
+	-- print(...)
 	local bin = core.unpack(...)
 	header_tmp.type = nil
 	header_tmp.session = nil

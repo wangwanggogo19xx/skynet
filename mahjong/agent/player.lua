@@ -76,14 +76,14 @@ end
 function M:pass()
 	skynet.call(self.game_mgr,"lua","pass",self.seat)
 end
-function M:pong(p)
-	skynet.call(self.game_mgr,"lua","pong",self.seat,p)
+function M:pong(p,session)
+	skynet.call(self.game_mgr,"lua","pong",self.seat,p,session)
 end
-function M:gong(p)
-	skynet.call(self.game_mgr,"lua","gong",self.seat,p)
+function M:gong(p,session)
+	skynet.call(self.game_mgr,"lua","gong",self.seat,p,session)
 end
-function M:win(p)
-	skynet.call(self.game_mgr,"lua","win",self.seat,p)
+function M:win(p,session)
+	skynet.call(self.game_mgr,"lua","win",self.seat,p,session)
 end
 function M:throw(p,session)
 	skynet.call(self.game_mgr,"lua","throw",self.seat,p,session)

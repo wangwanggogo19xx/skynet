@@ -129,7 +129,7 @@ notification 6 {
 	request {
 		seat 0 : integer
 		cmd 1 : string
-		value 2: integer
+		value 2: string
 	}
 }
 

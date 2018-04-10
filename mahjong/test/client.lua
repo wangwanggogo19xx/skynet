@@ -84,7 +84,7 @@ end
 
 local function input( )
 	local p = 0
-	for i=1,5000000 do
+	for i=1,5 do
 		p = socket.readstdin()
 		if p then
 			return p 
@@ -97,26 +97,38 @@ end
 local REQUEST = {}
 function REQUEST.set_discard(seat,value,response)
 	print("定缺")
+	print(value)
 	local p = input()
-	return response({cmd="set_discard",value=p})
+	if p then
+		return response({cmd="set_discard",value=p})
+	end
 end
+
 function REQUEST.get(seat,value,response )
 	print("get card : ",value)
-	local p = input()
-	print(p)
-	return response({cmd="throw",value=p})	
+	-- local p = input()
+	-- print(p)
+	-- if p then
+	-- 	return response({cmd="throw",value=p})	
+	-- end
 	-- body
+end
+function REQUEST.pong( seat,value,response )
+	return response({cmd="pong",value=nil})
 end
 
 function REQUEST.player_join(seat,value,response )
 	-- return response({cmd="throw",value=11})	
 	-- body
 end
+function REQUEST.show_holds(seat,value,response )
+	print(value)
+end
 function REQUEST.throw(seat,value,response )
 	print("player",seat,"throw",value)
 end
 local function request(name,args,response)
-	-- print(args.cmd)
+	print(args.cmd)
 	local f = REQUEST[args.cmd]
 	assert(f)
 	local ok,result =  f(args.seat,args.value,response)
@@ -124,7 +136,11 @@ local function request(name,args,response)
 	-- 	send_package(fd,result)
 	-- end
 	return ok,result
+end
 
+
+function REQUEST.player_pong( seat,p)
+	print(seat,"pong",p)
 
 end
 local function print_package(t, ...)

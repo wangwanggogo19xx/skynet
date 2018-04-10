@@ -5,7 +5,7 @@ local account_mgr = require "account_mgr"
 local CMD = {}
 
 function CMD.login( username,password )
-    return account_mgr.login(username,password)
+    return account_mgr:login(username,password)
 end
 
 

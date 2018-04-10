@@ -47,13 +47,13 @@ function REQUEST:set()
 	-- f(player,self.value)
 end
 
-function REQUEST:handshake()
-	return { msg = "Welcome to skynet, I will send heartbeat every 5 sec." }
-end
+-- function REQUEST:handshake()
+-- 	return { msg = "Welcome to skynet, I will send heartbeat every 5 sec." }
+-- end
 
-function REQUEST:quit()
-	skynet.call(WATCHDOG, "lua", "close", client_fd)
-end
+-- function REQUEST:quit()
+-- 	skynet.call(WATCHDOG, "lua", "close", client_fd)
+-- end
 
 local function request(name, args, response)
 	print("request==agent,params name",name,args,response)
@@ -70,6 +70,8 @@ local function response(session,args)
 		player:set_discard(args.value,session)
 	elseif args.cmd == "throw" then
 		player:throw(args.value,session)
+	elseif args.cmd == "pong" then
+		player:pong(args.value,session)
 	end
 
 end
@@ -120,8 +122,6 @@ function CMD.start(conf)
 	client_fd = fd
 
 
-	service = skynet.newservice("player_mgr",fd)
-	skynet.send(service,"lua","service_addr",service)
 
 	skynet.call(gate, "lua", "forward", fd)
 end
@@ -155,7 +155,7 @@ function CMD.set( conf )
 end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		print(command.."=====agent")
+		-- print(command.."=====agent")
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)

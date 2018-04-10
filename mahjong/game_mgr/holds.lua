@@ -21,8 +21,8 @@ function M:new()
 		need = {}, --能够要其他玩家出的牌
 		back_gang = { }, --暗杠
 		discard = nil,
-		pong = {},
-		gong = {}
+		pongs = {},
+		gongs = {}
 	}
 	setmetatable(o,self)
 	self.__index = self	
@@ -54,32 +54,38 @@ function M:check_need(p)
 	end
 end
 
-function M:throw(p)
-	print(p)
+function M:sub_one( p )
 	local temp = self.holds[ p // 10+1]
 	temp[p % 10] = temp[p % 10] - 1	
-	self:check_need(p)
+	self:check_need(p)	
+	return p
+end
+function M:throw(p)
+	-- print(p)
+	-- local temp = self.holds[ p // 10+1]
+	-- temp[p % 10] = temp[p % 10] - 1	
+	-- self:check_need(p)
+	self:sub_one(p)
 	table.insert(self.lose_heap,p)
 	return p
 end
 
-function M:random_lose()
+function M:random_one()
 	-- 如果还未缺，先把要缺的牌打出
 	if table_sum(self.holds[self.discard]) > 0 then
 		for i = 1,#self.holds[self.discard] do
 			if self.holds[self.discard][i] ~= 0 then
-				return self:throw( ( self.discard -1) * 10 +i)
+				return  ( self.discard -1) * 10 +i
 				
 			end
 		end
 	end
-
 	for i=1,#self.holds do
 		if  i ~= self.discard then
 			for j=1,#self.holds[i] do
 				if self.holds[i][j] > 0 then
-					print((i-1)*10 + j)
-					return self:throw((i-1)*10 + j)
+					-- print((i-1)*10 + j)
+					return (i-1)*10 + j
 				end
 			end
 		end
@@ -87,18 +93,18 @@ function M:random_lose()
 end
 function M:pong(p) --碰
 	if self.need[p] == "pong" or self.need[p] == "gong" then
-		self:throw(p)
-		self:throw(p)
-		table.insert(pong,p)
+		self:sub_one(p)
+		self:sub_one(p)
+		table.insert(self.pongs,p)
 	end
 end
 
-function M:gong(p ,player) --杠
+function M:gong(p ,playerseat) --杠
 	if  self.need[p] == "gong" then
-		self:throw(p)
-		self:throw(p)
-		self:throw(p)
-		self.gong[p] = player.pos
+		self:sub_one(p)
+		self:sub_one(p)
+		self:sub_one(p)
+		self.gongs[p] = playerseat
 	end
 end
 

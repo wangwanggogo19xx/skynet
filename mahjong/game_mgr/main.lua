@@ -22,15 +22,15 @@ function CMD.pass()
 end
 
 function CMD.pong(seat,p,session)
-	game:pong(seat,p)
+	game:pong(seat,p,session)
 end
 
 function CMD.gong(seat,p,session)
-	game:gong(seat,p)
+	game:gong(seat,p,session)
 end
 
 function CMD.win(seat,p,session)
-	game:win(p)
+	game:win(seat,p,session)
 end
 function CMD.throw(seat,p,session)
 	print("throw session",session)

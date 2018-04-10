@@ -7,7 +7,9 @@ local json = require "json"
 
 local function response(id, code, msg, ...)
     local data = json:encode(msg)
-    local ok, err = httpd.write_response(sockethelper.writefunc(id), code, data, ...)
+    local header = {}
+	header["Access-Control-Allow-Origin"] = "*"
+    local ok, err = httpd.write_response(sockethelper.writefunc(id), code, data, header)
     if not ok then
         -- if err == sockethelper.socket_error , that means socket closed.
         skynet.error(string.format("fd = %d, %s", id, err))
@@ -66,16 +68,16 @@ local function handle(id)
         print(path)
         local f = GET[path]
         if f then
-        	f(id,data)
-            return
+        	return f(id,data)
+            
         end
     else
         local path = string.sub(url,2,string.len(url))
         local data = decode_body(body)
         local f = POST[path]
         if f then
-         f(id,data)
-         return
+          return f(id,data)
+       
         end
     end
     response(id,200,{succeed=0,err="something errors"})
