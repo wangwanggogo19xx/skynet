@@ -72,6 +72,8 @@ local function response(session,args)
 		player:throw(args.value,session)
 	elseif args.cmd == "pong" then
 		player:pong(args.value,session)
+	elseif args.cmd == "gong" then
+		player:gong(args.value,session)	
 	end
 
 end

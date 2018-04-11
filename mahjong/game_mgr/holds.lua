@@ -1,4 +1,4 @@
-function table_sum(table)
+local function table_sum(table)
 	local sum = 0
 	for i=1,#table do
 		sum  = sum + table[i]
@@ -9,7 +9,6 @@ end
 -- 玩家对应的牌
 local M = {}
 function M:new()
-
 	local o = {
 		holds={
 			{0,0,0,0,0,0,0,0,0},
@@ -61,14 +60,11 @@ function M:sub_one( p )
 	return p
 end
 function M:throw(p)
-	-- print(p)
-	-- local temp = self.holds[ p // 10+1]
-	-- temp[p % 10] = temp[p % 10] - 1	
-	-- self:check_need(p)
 	self:sub_one(p)
 	table.insert(self.lose_heap,p)
 	return p
 end
+
 
 function M:random_one()
 	-- 如果还未缺，先把要缺的牌打出
@@ -91,6 +87,8 @@ function M:random_one()
 		end
 	end
 end
+
+
 function M:pong(p) --碰
 	if self.need[p] == "pong" or self.need[p] == "gong" then
 		self:sub_one(p)
@@ -124,25 +122,30 @@ function M:__tostring( )
 	-- return os.time()
 end
 
-function M:random_discard()
-	-- 随机为排数最少的一种花色
-	local tep1 = table_sum(self.holds[1])
-	local tep2 = table_sum(self.holds[2])
-	local tep3 = table_sum(self.holds[3])
-
-	if tep1 <= tep2 then
-		if tep1 <= tep3 then
-			self.discard = 1
-		else
-			self.discard = 3
-		end
+function M:set_discard(t)
+	if t and t>=1 and t<=3 then
+		self.discard = t
 	else
-		if tep2 <= tep3 then
-			self.discard = 2
+		-- 随机为排数最少的一种花色
+		local tep1 = table_sum(self.holds[1])
+		local tep2 = table_sum(self.holds[2])
+		local tep3 = table_sum(self.holds[3])
+		if tep1 <= tep2 then
+			if tep1 <= tep3 then
+				self.discard = 1
+			else
+				self.discard = 3
+			end
 		else
-			self.discard = 3
-		end		
+			if tep2 <= tep3 then
+				self.discard = 2
+			else
+				self.discard = 3
+			end		
+		end
 	end
+
+
 	print("定缺种类为：",self.discard)
 end
 

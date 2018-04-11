@@ -8,30 +8,28 @@ local allow_next = false
 -- 当 current_session == wait_session 允许下一步，否则就等待，或者等待超时后执行下一步
 local current_session  = 0
 local current_card  -- 当前牌
+
+local task_thread
+
 -- local current_seat -- 当前出牌的玩家
 -- local session = 0
 
-local function wakeup(sec,co)
-	for i=1,sec * 10 do
-		if allow_next then
-			skynet.wakeup(co)
-			print("wakeup===========")
-			return	
-		end	
-		skynet.sleep(10)
-	end	
+local function wakeup()
+	skynet.wakeup(task_thread)
+	allow_next = true
+	skynet.yield()
 end
 
 
-local tt
-
 local function wait( sec,func,...)
-	print(current_session,"===============")
+	task_thread = coroutine.running()
+
+	-- print(current_session,"===============")
 	allow_next = false
-	skynet.fork(wakeup,sec , coroutine.running())
+	-- print("allow_next",allow_next)
 	skynet.sleep(sec * 100)
-	print(current_session,"====================")
-	
+	-- print(current_session,"====================")
+	-- print("allow_next",allow_next)
 	if not allow_next then
 		print("")
 		print("overtime....")
@@ -39,6 +37,9 @@ local function wait( sec,func,...)
 			func(...)
 		end
 		allow_next = true
+	else
+		print("")
+		print("be wakeup")		
 	end
 end
 
@@ -61,7 +62,7 @@ end
 
 function M:start()
 	self:init_holds()
-	-- self:deal()
+	self:deal()
 
 end
 
@@ -101,12 +102,7 @@ function M:init_holds()
 			skynet.send(self.player_mgrs[i],"lua","game",{cmd="set_discard",value=self.holds[i]:__tostring()},current_session)
 		end
 	end
-	-- skynet.wait()
-	tt = coroutine.running()
-	skynet.sleep(10000)
-	print("111")
-	-- wait(15,self.random_discard,self)
-	-- body
+	wait(1,self.random_discard,self)
 end
 
 
@@ -114,14 +110,14 @@ function M:pong(seat,p,session)
 	if session == current_session then
 		print(seat,"pong",current_card)
 		current_session =  current_session + 1
-		allow_next = true
 		self.current_seat = seat
+		wakeup()
 		------------
-		
 		self.holds[seat]:pong(current_card)
 		for i=1,4 do 
 			skynet.send(self.player_mgrs[i],"lua","notify",{seat=seat,cmd = "player_pong",value = current_card})
 		end
+
 		if not p then
 			p = self.holds[seat]:random_one()
 		end		
@@ -133,14 +129,20 @@ end
 
 function M:gong(seat,p,session)
 	if session == current_session then
-		print(seat,"pong",self.current_card)
-
+		print(seat,"gong",self.current_card)
 		current_session =  current_session + 1
-		allow_next = true
+		self.current_seat = seat
+		wakeup()
+
 		self.holds[seat]:gong(current_card,self.current_seat)
 		for i=1,4 do 
 			skynet.call(self.player_mgrs[i],"lua","notify",{seat=seat,cmd = "player_gong",value = current_card})
 		end		
+
+
+		if not p then
+			p = self.holds[seat]:random_one()
+		end			
 		self:throw(seat,p,current_session)
 	else 
 		print("session has expired")
@@ -153,22 +155,21 @@ function M:win(seat,p,session)
 	end	
 	
 end
+
 function M:throw(seat,p,session)
 	if current_session == session and self.holds[seat]:has_p(p) then
 		current_session = current_session + 1
 		current_card = self.holds[seat]:throw(p)
 		self.current_seat = seat
+		wakeup()
 
-		
 		local ok 
 		for i=1,4 do 
 			print("inform seat and throw",seat,p)
-
 			-- 通知其他玩家，当前玩家出牌：p
 			skynet.send(self.player_mgrs[i],"lua","notify",{seat=seat,cmd = "throw",value = p})
 			if  i ~= seat and self.holds[i].need[p] then
 				--通知，并等待其他用户可进行的操作
-				print(i,self.holds[i].need[p],p)
 				skynet.send(self.player_mgrs[i],"lua","game",{cmd = self.holds[i].need[p],value = p},current_session)
 				ok = true
 			end
@@ -184,30 +185,27 @@ function M:throw(seat,p,session)
 		end
 		-- 等待玩家操作
 	end
-	-- allow_next = true
 end
 
 
 
 function M:set_discard(seat,t,session)
-	print(tt,coroutine.running())
-	print(seat,t,session)
-	skynet.wakeup(tt)
 	if session == current_session then
 		if not self.holds[seat].discard then
 			if t and t >=1 and t<=3  then
-				self.holds[seat].discard = t
+				self.holds[seat]:set_discard(t)
 				for i=1,#self.holds do
 					if not self.holds[i].discard then
 						return
 					end
 				end
 				print("all player have set discard")
-				allow_next = true  -- 允许下一步操作
+				wakeup()
 			end	
 		end
+	else
+		print("session has expired")
 	end
-	print("session has expired")
 end
 
 
@@ -221,7 +219,7 @@ function M.random_discard(game)
 	for j = 1,4 do
 		if  not game.holds[j].discard then
 			print("player" ,j,"random_discard")
-			game.holds[j]:random_discard()
+			game.holds[j]:set_discard(t)
 		end
 	end
 	current_session = current_session + 1	

@@ -84,7 +84,7 @@ end
 
 local function input( )
 	local p = 0
-	for i=1,50000 do
+	for i=1,500 do
 		p = socket.readstdin()
 		if p then
 			return p 
@@ -99,7 +99,7 @@ function REQUEST.set_discard(seat,value,response)
 	print("定缺")
 	print(value)
 	local p = input()
-	print(p)
+	-- print(p)
 	if p then
 		return response({cmd="set_discard",value=p})
 	end
@@ -118,6 +118,9 @@ function REQUEST.pong( seat,value,response )
 	return response({cmd="pong",value=nil})
 end
 
+function REQUEST.gong( seat,value,response )
+	return response({cmd="gong",value=nil})
+end
 function REQUEST.player_join(seat,value,response )
 	-- return response({cmd="throw",value=11})	
 	-- body
@@ -142,6 +145,10 @@ end
 
 function REQUEST.player_pong( seat,p)
 	print(seat,"pong",p)
+
+end
+function REQUEST.player_gong( seat,p)
+	print(seat,"gong",p)
 
 end
 local function print_package(t, ...)
