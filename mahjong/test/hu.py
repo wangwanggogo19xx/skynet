@@ -87,7 +87,8 @@ def legal_hand(s):
                 # no chows and pongs, and only one pair remains, legal hand
                     return True
             for operator in operators:
-                newdct = operate(dct, operator) # remove chow/pong, iterate
+                newdct = operate(dct, 
+                ) # remove chow/pong, iterate
                 if one_step(newdct):
                     return True
         return False # find nothing
