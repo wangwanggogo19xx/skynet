@@ -7,8 +7,9 @@ local agent = {}
 
 function SOCKET.open(fd, addr)
 	skynet.error("New client from : " .. addr,"fd..."..fd)
+	print(".......")
 	agent[fd] = skynet.newservice("agent")
-	skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
+	-- skynet.call(agent[fd], "lua", "start", { gate = gate, client = fd, watchdog = skynet.self() })
 end
 
 local function close_agent(fd)
@@ -49,7 +50,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, subcmd, ...)
-		print(cmd.."====watchdog")
+		print(cmd.."====watchdog",subcmd)
 		if cmd == "socket" then
 			local f = SOCKET[subcmd]
 			f(...)

@@ -79,7 +79,6 @@ function M:deal(seat)
 		print("game over .......")
 		return
 	end
-
 	seat = seat or  math.random(math.random(1,#self.player_mgrs))
 	self.current_seat = seat
 	if not self.win[current_seat] then
@@ -207,11 +206,6 @@ function M:set_discard(seat,t,session)
 		print("session has expired")
 	end
 end
-
-
-
-
-
 
 
 
