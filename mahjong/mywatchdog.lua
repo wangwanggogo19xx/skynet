@@ -15,14 +15,13 @@ local function close_agent(fd)
 	agent[fd] = nil
 	if a then
 		skynet.call(gate, "lua", "kick", fd)
-		-- disconnect never return
 		skynet.send(a, "lua", "disconnect")
 	end
 end
 
 function handler.on_open(ws)
-    print(string.format("%d::open", ws.id))
-    agent[fd] = skynet.newservice("agent")
+    print(string.format("%d::open",ws.id))
+    agent[ws.id] = skynet.newservice("agent")
 end
 
 function handler.on_message(ws, message)
@@ -36,8 +35,10 @@ function handler.on_message(ws, message)
     -- -- print(data)
     -- -- print(data.username)
     -- ws:close()
+    print(message.cmd)
     local data = json:decode(message)
-    skynet.call(agent[ws[fd],"lua",data)
+    print(data.cmd)
+    skynet.call(agent[ws.id],"lua",data)
 end
 
 function handler.on_close(ws, code, reason)
@@ -61,7 +62,7 @@ local function handle_socket(id)
 end
 
 skynet.start(function()
-    local address = "0.0.0.0:8001"
+    local address = "0.0.0.0:8008"
     skynet.error("Listening "..address)
     local id = assert(socket.listen(address))
     socket.start(id , function(id, addr)

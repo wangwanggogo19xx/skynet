@@ -12,17 +12,18 @@ skynet.start(function()
 	skynet.newservice("debug_console",8000)
 	-- skynet.newservice("simpledb")
 	local watchdog = skynet.newservice("watchdog")
-	skynet.call(watchdog, "lua", "start", {
-		port = 8888,
-		maxclient = max_client,
-		nodelay = true,
-	})
+	-- skynet.call(watchdog, "lua", "start", {
+	-- 	port = 8888,
+	-- 	maxclient = max_client,
+	-- 	nodelay = true,
+	-- })
 
-	local id =skynet.uniqueservice("area_mgr")
-	skynet.error("Watchdog listen on", 8888)
+	local mywatchdog = skynet.newservice("mywatchdog");
+	-- local id =skynet.uniqueservice("area_mgr")
+	-- skynet.error("Watchdog listen on", 8888)
 
-	skynet.uniqueservice("httplistener",8080)
-	skynet.uniqueservice("account_mgr")
+	-- skynet.uniqueservice("httplistener",8080)
+	-- skynet.uniqueservice("account_mgr")
 
 	
 	skynet.exit()

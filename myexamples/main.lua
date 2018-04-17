@@ -17,6 +17,8 @@ skynet.start(function()
 	-- 	maxclient = max_client,
 	-- 	nodelay = true,
 	-- })
+
+	local mywatchdog = skynet.newservice("mywatchdog");
 	skynet.newservice("webservice")
 	
 	skynet.error("Watchdog listen on", 8888)

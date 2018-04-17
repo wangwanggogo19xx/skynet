@@ -158,8 +158,9 @@ end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
 		-- print(command.."=====agent")
-		local f = CMD[command]
-		skynet.ret(skynet.pack(f(...)))
+		-- local f = CMD[command]
+		-- skynet.ret(skynet.pack(f(...)))
+		print(command)
 	end)
 
 	
