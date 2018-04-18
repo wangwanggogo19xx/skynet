@@ -22,6 +22,7 @@ end
 function handler.on_open(ws)
     print(string.format("%d::open",ws.id))
     agent[ws.id] = skynet.newservice("agent")
+    -- skynet.call(agent[ws.id],"lua","start",{ws=ws,watchdog=skynet.self()})
 end
 
 function handler.on_message(ws, message)
@@ -35,10 +36,15 @@ function handler.on_message(ws, message)
     -- -- print(data)
     -- -- print(data.username)
     -- ws:close()
-    print(message.cmd)
     local data = json:decode(message)
-    print(data.cmd)
-    skynet.call(agent[ws.id],"lua",data)
+    local ret = skynet.call(agent[ws.id],"lua","dispatch",data)
+    print(ret.succeed)
+    if ret then
+        local str = json:encode(ret)
+        print(str)
+        ws:send_text(str)
+    end
+    -- skynet.call(agent[ws.id],"lua",data)
 end
 
 function handler.on_close(ws, code, reason)

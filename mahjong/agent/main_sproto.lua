@@ -15,6 +15,8 @@ local client_fd
 local service 
 local player 
 local session = 100
+local ws
+
 
 function REQUEST:get()
 	print("get", self.what)
@@ -46,6 +48,14 @@ function REQUEST:set()
 	-- local f = assert(player[self.what])
 	-- f(player,self.value)
 end
+
+-- function REQUEST:handshake()
+-- 	return { msg = "Welcome to skynet, I will send heartbeat every 5 sec." }
+-- end
+
+-- function REQUEST:quit()
+-- 	skynet.call(WATCHDOG, "lua", "close", client_fd)
+-- end
 
 local function request(name, args, response)
 	print("request==agent,params name",name,args,response)
@@ -150,8 +160,9 @@ end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
 		-- print(command.."=====agent")
-		local f = CMD[command]
-		skynet.ret(skynet.pack(f(...)))
+		-- local f = CMD[command]
+		-- skynet.ret(skynet.pack(f(...)))
+		print(command)
 	end)
 
 	
