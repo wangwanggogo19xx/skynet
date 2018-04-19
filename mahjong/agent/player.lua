@@ -45,9 +45,10 @@ end
 function M:join_room(room_mgr,seat)
 	if not room_mgr then
 		room_mgr = skynet.call("area_mgr","lua","random_room")
+		-- print("room_mgr",room_mgr)
 	end
 	local succeed,seat,info,room_mgr =  skynet.call(room_mgr ,"lua","add_player",self.agent,seat)
-
+	print(succeed,seat,info,room_mgr)
 	if succeed then
 		self.room_mgr = room_mgr
 		self.seat = seat
@@ -57,7 +58,8 @@ function M:join_room(room_mgr,seat)
 end
 
 function M:toggle_ready()
-	 skynet.call(self.room_mgr ,"lua","seat_ready",self.seat)
+	print(self.room_mgr,"===========")
+	skynet.call(self.room_mgr ,"lua","seat_ready",self.seat)
 	--  self.ready,self.game_mgr =
 	-- print(self.ready,self.game_mgr,"=========+++++++++++")
 end

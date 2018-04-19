@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>skynet WebSocket example</title>
+</head>
+<body>   
+  <script>
+    var ws = new WebSocket('ws://127.0.0.1:8008/ws');
+    var loin=function(){
+        var str = '{"cmd":"login","value":{"username":"1","password":"1"},"session":0}';
+         // ws.send('{"username":"123","password":"123"}'); 
+         ws.send(str);        
+    }
+    var join_room=function(){
+        console.log("join_room.........")
+        var str = '{"cmd":"join_room","value":{},"session":0}';
+         // ws.send('{"username":"123","password":"123"}'); 
+         ws.send(str);          
+    }
+    var ready = function(){
+         var str = '{"cmd":"toggle_ready","value":{},"session":0}';
+         // ws.send('{"username":"123","password":"123"}'); 
+         ws.send(str);         
+    }
+    ws.onopen = function(){
+     // alert("open");
+        loin();
+        join_room();
+        // ready();
+    };
+    ws.onmessage = function(ev){
+     // alert(ev.data);
+     console.log(ev.data);
+    };
+    ws.onclose = function(ev){
+     alert("close");
+    };
+    ws.onerror = function(ev){
+     alert("error");
+    };
+
+  </script>
+</body>
+</html>

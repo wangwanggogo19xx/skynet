@@ -15,6 +15,14 @@ function M:new(room_id)
 	return o	
 end
 
+function M:notify_all_player(data)
+	for i=1,#self.player_mgrs do
+		if self.player_mgrs[i] then
+			skynet.send(self.player_mgrs[i],"lua","notify",data)	
+		end
+	end
+end
+
 function M:empty()
 	for i=1,#self.players do
 		if not self.players[i] then
@@ -65,10 +73,11 @@ function M:add_player(player_mgr,seat)
 			if self.player_mgrs[i] and not rawequal(player_mgr,self.player_mgrs[i]) then
 
 				---掉线发生异常
-				skynet.call(self.player_mgrs[i],"lua","notify",{cmd = "player_join",value=player_mgr,seat=seat})
+				skynet.send(self.player_mgrs[i],"lua","notify",{cmd = "player_join",value=player_mgr,seat=seat})
 			end
 		end	
 	end
+	print("==========room return")
 	return succeed,seat,info,self.id
 end
 
@@ -96,8 +105,11 @@ function M:seat_ready(seat)
 		end
 		skynet.send(gameservice,"lua","start",self.player_mgrs)		
 	end
-	print("waiting ...")
-	return self.seat_status[seat] == 2
+	print(#self.player_mgrs,"===========")
+	local ret = {cmd="player_join",value={seat=seat}}
+	self:notify_all_player(ret)
+
+	return ret
 end
 
 function M:remove_player( player )
@@ -117,14 +129,16 @@ function M:remove_player( player )
 			end
 		end	
 	end
-
 	return false
 end
+
 
 
 function M:__tostring()
 	return self.id..""
 	-- body
 end
+
+
 return M
 -- skynet.start()

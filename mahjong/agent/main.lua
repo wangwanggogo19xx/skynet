@@ -5,6 +5,7 @@ local sproto = require "sproto"
 local sprotoloader = require "sprotoloader"
 local p = require "player"
 local json = require "json"
+local websocket = require "websocket"
 
 local WATCHDOG
 local host
@@ -18,6 +19,11 @@ local player
 local session = 100
 local ws
 
+local function sendRequest(data)
+	-- print("sendRequest")
+	skynet.call(WATCHDOG,"lua","notify",client_fd,data)
+end
+
 function REQUEST:get()
 	print("get", self.what)
 	local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
@@ -25,20 +31,24 @@ function REQUEST:get()
 end
 
 function REQUEST.login(user)
+	local ret
 	if user.username == "1" and user.password == "1" then
 		player = p:new(skynet.self())
-		return {succeed=1,error=""}
+		ret = {succeed=1,error=""}
 	else
-		return {succeed=0,error="invalid username or password"}
+		ret =  {succeed=0,error="invalid username or password"}
 	end
+	sendRequest(ret)
+	return ret
 end
-function REQUEST:join_room()
-	local succeed,seat,err,room_id = player:join_room(self.room_mgr,self.seat)
-	print(succeed,seat,err,room_id)
-	return {succeed=succeed,seat=seat,info=err,room=room_id}
+function REQUEST.join_room(info)
+	print(client_fd,"fd is")
+	local succeed,seat,err,room_id = player:join_room(info.room_id,info.seat)
+	print(info.room_id,info.seat)
+	sendRequest({succeed=succeed,seat=seat,info=err,room=room_id})
 end
 
-function REQUEST:toggle_ready()
+function REQUEST.toggle_ready()
 	skynet.sleep(20)
 	player:toggle_ready()
 end
@@ -49,10 +59,7 @@ function REQUEST:set()
 	-- f(player,self.value)
 end
 
-local function sendRequest(data)
-	local str = JSON:encode(data)
-	ws.send(str);
-end
+
 local function response(session,args)
 	print("game_session",session)
 	if args.cmd == "set_discard" then
@@ -79,8 +86,7 @@ end
 
 function CMD.start(conf)
 	WATCHDOG = conf.watchdog
-	ws = conf.ws
-	print("agent started")
+	client_fd = conf.fd
 end
 
 function CMD.disconnect()
@@ -89,9 +95,8 @@ function CMD.disconnect()
 end
 
 
-function CMD.notify(...)
-	local str = send_request("notification",...)
-	send_package(str)
+function CMD.notify(data)
+	sendRequest(data)
 end
 
 
@@ -112,17 +117,17 @@ function CMD.set( conf )
 end
 function CMD.dispatch(data)
 	local f = REQUEST[data.cmd]
+	-- print(data.cmd)
 	if f then
 		return f(data.value,data.session)
 	end
 end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
-		print(command.."=====agent")
 		local f = CMD[command]
 		skynet.ret(skynet.pack(f(...)))
 	end)
 
-	print("agent starting")
+	-- print("agent starting")
 	-- skynet.register("agent")
 end)

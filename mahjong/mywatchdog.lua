@@ -9,12 +9,13 @@ local json = require "json"
 
 local handler = {}
 local agent = {}
+local wss = {}
+local M = {}
 
 local function close_agent(fd)
 	local a = agent[fd]
 	agent[fd] = nil
 	if a then
-		skynet.call(gate, "lua", "kick", fd)
 		skynet.send(a, "lua", "disconnect")
 	end
 end
@@ -22,29 +23,15 @@ end
 function handler.on_open(ws)
     print(string.format("%d::open",ws.id))
     agent[ws.id] = skynet.newservice("agent")
-    -- skynet.call(agent[ws.id],"lua","start",{ws=ws,watchdog=skynet.self()})
+    wss[ws.id] = ws
+    skynet.call(agent[ws.id],"lua","start",{fd = ws.id,watchdog = skynet.self()})
 end
 
 function handler.on_message(ws, message)
-    -- print(string.format("%d receive:%s", ws.id, message))
-    -- ws:send_text(message .. "from server")
-    -- print("decode.......")
-    -- x='{"id":"UserInfo_BILL","actions":[],"attributes":{}}'
-    -- y=json:decode(message)
-    -- print(y.username)
-    -- -- 
-    -- -- print(data)
-    -- -- print(data.username)
-    -- ws:close()
     local data = json:decode(message)
-    local ret = skynet.call(agent[ws.id],"lua","dispatch",data)
-    print(ret.succeed)
-    if ret then
-        local str = json:encode(ret)
-        print(str)
-        ws:send_text(str)
-    end
-    -- skynet.call(agent[ws.id],"lua",data)
+    print(data.cmd,"data.cmd")
+    skynet.send(agent[ws.id],"lua","dispatch",data)
+
 end
 
 function handler.on_close(ws, code, reason)
@@ -56,8 +43,8 @@ end
 local function handle_socket(id)
     -- limit request body size to 8192 (you can pass nil to unlimit)
     local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 8192)
+    print(header)
     if code then
-        
         if header.upgrade == "websocket" then
             local ws = websocket.new(id, header, handler)
             ws:start()
@@ -65,6 +52,11 @@ local function handle_socket(id)
     end
 
 
+end
+
+function M.notify(id,data)
+    local str = json:encode(data)
+    websocket.send_text(wss[id],str)
 end
 
 skynet.start(function()
@@ -75,4 +67,13 @@ skynet.start(function()
        socket.start(id)
        pcall(handle_socket, id)
     end)
+    
+    skynet.dispatch("lua", function(_,_, command, ...)
+        
+        if command == "notify" then
+            local f = M[command]
+            f(...)
+        end
+        -- skynet.ret(skynet.pack(f(...)))
+    end)    
 end)

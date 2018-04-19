@@ -19,7 +19,7 @@ skynet.start(function()
 	-- })
 
 	local mywatchdog = skynet.newservice("mywatchdog");
-	-- local id =skynet.uniqueservice("area_mgr")
+	local id =skynet.uniqueservice("area_mgr")
 	-- skynet.error("Watchdog listen on", 8888)
 
 	-- skynet.uniqueservice("httplistener",8080)
