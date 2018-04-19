@@ -79,13 +79,14 @@ function M:deal(seat)
 		print("game over .......")
 		return
 	end
+	
 	seat = seat or  math.random(math.random(1,#self.player_mgrs))
 	self.current_seat = seat
 	if not self.win[current_seat] then
 		local p = self.mj:next()
 		self.holds[seat]:add(p)
 		print(seat,"get card",p)
-		skynet.send(self.player_mgrs[seat],"lua","game",{cmd="get",seat=seat,value=p},current_session)
+		skynet.send(self.player_mgrs[seat],"lua","notify",{cmd="get",{seat=seat,value=p},session =current_session})
 		wait(1,self.random_throw,self,seat)
 		return	
 	end
@@ -98,7 +99,7 @@ function M:init_holds()
 			for j=1,self.holds[i].init_holds_count do
 				self.holds[i]:add(self.mj:next())
 			end
-			skynet.send(self.player_mgrs[i],"lua","game",{cmd="set_discard",value=self.holds[i]:__tostring()},current_session)
+			skynet.send(self.player_mgrs[i],"lua","notify",{cmd="set_discard",value={holds=self.holds[i].holds},session=current_session})
 		end
 	end
 	wait(1,self.random_discard,self)
@@ -166,10 +167,10 @@ function M:throw(seat,p,session)
 		for i=1,4 do 
 			print("inform seat and throw",seat,p)
 			-- 通知其他玩家，当前玩家出牌：p
-			skynet.send(self.player_mgrs[i],"lua","notify",{seat=seat,cmd = "throw",value = p})
+			skynet.send(self.player_mgrs[i],"lua","notify",{cmd = "throw",value={seat=seat,value = p}})
 			if  i ~= seat and self.holds[i].need[p] then
 				--通知，并等待其他用户可进行的操作
-				skynet.send(self.player_mgrs[i],"lua","game",{cmd = self.holds[i].need[p],value = p},current_session)
+				skynet.send(self.player_mgrs[i],"lua","notify",{cmd = "option",value ={option=self.holds[i].need[p],targetP=p},current_session})
 				ok = true
 			end
 		end
