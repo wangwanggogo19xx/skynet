@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>skynet WebSocket example</title>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
 </head>
 <body>   
   <script>
@@ -13,7 +14,6 @@
     }
     var join_room=function(){
         console.log("join_room.........")
-        var str = '{"cmd":"join_room","value":{},"session":0}';
          // ws.send('{"username":"123","password":"123"}'); 
          ws.send(str);          
     }
@@ -21,6 +21,14 @@
          var str = '{"cmd":"toggle_ready","value":{},"session":0}';
          // ws.send('{"username":"123","password":"123"}'); 
          ws.send(str);         
+    }
+    var result = {}
+    result["succeed_join"] = function(data){
+        // console.log(data);
+        // $.get('http://127.0.0.1:8080/get_room_info?room_mgr='+data.room_mgr, function(data) {
+        //     /*optional stuff to do after success */
+        //     console.log(data);
+        // });
     }
     ws.onopen = function(){
      // alert("open");
@@ -31,6 +39,12 @@
     ws.onmessage = function(ev){
      // alert(ev.data);
      console.log(ev.data);
+     // console.log(ev.data.cmd);
+     var data = JSON.parse(ev.data)
+     // console.log(data);
+     if(result[data.cmd]){
+        result[data.cmd](data.value);
+     }
     };
     ws.onclose = function(ev){
      alert("close");

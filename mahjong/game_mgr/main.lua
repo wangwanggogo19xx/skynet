@@ -7,30 +7,32 @@ local CMD = {}
 
 
 function CMD.start( ...)
-	local player_mgrs = ...
-	game = g:new(player_mgrs)
+	local players = ...
+	for k,v in pairs(players) do
+		for a,b in pairs(v) do
+			print(a,b)
+		end
+	end
+	print(skynet.self())
+	game = g:new(players,skynet.self())
 	game:start()
 	-- body
 end
--- function CMD:lose( ... )
--- 	game:lose(...)
--- 	-- body
--- end
 
-function CMD.pass()
-
+function CMD.pass(seat,session)
+	game:pass(seat,session)
 end
 
 function CMD.pong(seat,p,session)
 	game:pong(seat,p,session)
 end
 
-function CMD.gong(seat,p,session)
-	game:gong(seat,p,session)
+function CMD.zhi_gong(seat,p,session)
+	game:zhi_gong(seat,p,session)
 end
 
-function CMD.win(seat,p,session)
-	game:win(seat,p,session)
+function CMD.hu(seat,p,session)
+	game:hu(seat,p,session)
 end
 function CMD.throw(seat,p,session)
 	print("throw session",session)

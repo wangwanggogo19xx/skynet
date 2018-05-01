@@ -24,11 +24,11 @@ local function sendRequest(data)
 	skynet.call(WATCHDOG,"lua","notify",client_fd,data)
 end
 
-function REQUEST:get()
-	print("get", self.what)
-	local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
-	return { result = r }
-end
+-- function REQUEST:get()
+-- 	print("get", self.what)
+-- 	local r = skynet.call("SIMPLEDB", "lua", "get", self.what)
+-- 	return { result = r }
+-- end
 
 function REQUEST.login(user)
 	local ret
@@ -42,16 +42,43 @@ function REQUEST.login(user)
 	return ret
 end
 function REQUEST.join_room(info)
-	print(client_fd,"fd is")
-	local succeed,seat,err,room_id = player:join_room(info.room_id,info.seat)
-	print(info.room_id,info.seat)
-	sendRequest({succeed=succeed,seat=seat,info=err,room=room_id})
+	local ret = player:join_room(info.room_id,info.seat)
+	sendRequest(ret)
 end
 
+function REQUEST.leave_room()
+	player:leave_room()
+end
 function REQUEST.toggle_ready()
 	skynet.sleep(20)
 	player:toggle_ready()
 end
+function REQUEST.set_discard(data,session)
+	-- print(session)
+	player:set_discard(data.type ,session)
+	-- print("set_discard")
+	-- body
+end
+
+function REQUEST.throw(data,session)
+	player:throw(data.p,session)
+end
+function REQUEST.pong(data,session)
+	player:pong(data.p,session)
+end
+function REQUEST.zhi_gong(data,session)
+	player:zhi_gong(data.p,session)
+end
+function REQUEST.pass(data,session)
+	-- body
+	print(session)
+	player:pass(session)
+end
+function REQUEST.hu(data,session)
+	player:hu(data.p,session)
+	-- body
+end
+
 function REQUEST:set()
 	-- print("get", self.what,self.value)
 	-- skynet.call(service,"lua",self.what,self.value)
@@ -90,6 +117,7 @@ function CMD.start(conf)
 end
 
 function CMD.disconnect()
+	REQUEST.leave_room()
 	-- todo: do something before exit
 	skynet.exit()
 end
@@ -111,16 +139,27 @@ function CMD.game(obj,game_session)
 	local str = send_request("game",obj,game_session)
 	send_package(str)	
 end
+
+-- 设置属性
 function CMD.set( conf )
-	player[conf.attr] = conf.value
-	print(player.game_mgr)
+	for k,v in pairs(conf) do
+		player[v.attr] = v.value
+	end
+	-- player[conf.attr] = conf.value
+	-- print(player.game_mgr)
 end
 function CMD.dispatch(data)
 	local f = REQUEST[data.cmd]
 	-- print(data.cmd)
 	if f then
 		return f(data.value,data.session)
+	else
+		print("no cmd",data.cmd)
 	end
+end
+function CMD.get_info()
+	-- print()
+	return player:get_info()
 end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)

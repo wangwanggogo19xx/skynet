@@ -13,9 +13,12 @@ local wss = {}
 local M = {}
 
 local function close_agent(fd)
+    print(fd)
 	local a = agent[fd]
 	agent[fd] = nil
+    print(a == nil)
 	if a then
+        print("disconnect..........")
 		skynet.send(a, "lua", "disconnect")
 	end
 end
@@ -28,15 +31,16 @@ function handler.on_open(ws)
 end
 
 function handler.on_message(ws, message)
+    print(message)
     local data = json:decode(message)
-    print(data.cmd,"data.cmd")
+    -- print(data.cmd,"data.cmd")
     skynet.send(agent[ws.id],"lua","dispatch",data)
 
 end
 
 function handler.on_close(ws, code, reason)
     print(string.format("%d close:%s  %s", ws.id, code, reason))
-    close_agent(ws.fd)
+    close_agent(ws.id)
     -- ws:close()
 end
 

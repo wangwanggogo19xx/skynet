@@ -65,7 +65,8 @@ function test_ting( )
 		{0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0,0},
 	}	
-	hu.get_ting(h)
+	local t = hu.get_ting(h)
+	print(t[1])
 	-- body
 end
 test_ting()

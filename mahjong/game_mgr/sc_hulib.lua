@@ -103,7 +103,9 @@ end
 
 
 
-local function huable(holds)	
+local M = {}
+
+function M.huable(holds)	
 	if check_special(holds) then
 		return true
 	end
@@ -137,21 +139,25 @@ local function huable(holds)
 	return false
 end 
 
-local M = {}
+
 function M.get_ting(holds)
+	local temp = {}
 	for i =1,3 do
 		if get_first_pos(holds[i]) then
 			for j=1,9 do
 				holds[i][j] = holds[i][j] + 1
-				if huable(holds) then
-					print("hu",(i -1 )*10 + j)
+				if M.huable(holds) then
+					temp[(i -1 )*10 + j] = 1
+					-- print("hu",(i -1 )*10 + j)
+
 				else
-					print("pass",(i -1 )*10 + j)
+					-- print("pass",(i -1 )*10 + j)
 				end
 				holds[i][j] = holds[i][j] - 1
 			end
 		end
 	end
+	return temp
 
 end
 

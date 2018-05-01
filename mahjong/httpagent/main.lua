@@ -43,6 +43,11 @@ function GET.login(id,data)
 	response(id,200, ret)
 end
 
+function GET.get_room_info(id,data )
+    print(data.room_mgr)
+    local ret = skynet.call(data.room_mgr,"get_room_info")
+    -- response()
+end
 
 local POST = {}
 

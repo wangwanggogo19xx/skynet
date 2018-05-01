@@ -22,8 +22,8 @@ skynet.start(function()
 	local id =skynet.uniqueservice("area_mgr")
 	-- skynet.error("Watchdog listen on", 8888)
 
-	-- skynet.uniqueservice("httplistener",8080)
-	-- skynet.uniqueservice("account_mgr")
+	skynet.uniqueservice("httplistener",8080)
+	skynet.uniqueservice("account_mgr")
 
 	
 	skynet.exit()

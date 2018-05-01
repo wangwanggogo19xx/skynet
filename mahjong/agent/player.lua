@@ -38,30 +38,40 @@ end
 -- end
 
 
-function M:player_leave( player )
-	print(player,"leave")
+function M:leave_room()
+	succeed = skynet.call(self.room_mgr ,"lua","remove_player",self.seat)
+	if succeed then
+		self.seat = nil
+		self.ready = nil
+		self.game_mgr = nil
+		self.room_mgr = nil
+		return {cmd="succeed_leave"}
+	end
 end
 
 function M:join_room(room_mgr,seat)
 	if not room_mgr then
 		room_mgr = skynet.call("area_mgr","lua","random_room")
-		-- print("room_mgr",room_mgr)
 	end
-	local succeed,seat,info,room_mgr =  skynet.call(room_mgr ,"lua","add_player",self.agent,seat)
-	print(succeed,seat,info,room_mgr)
-	if succeed then
+	local ret =  skynet.call(room_mgr ,"lua","add_player",self.agent,self.name,seat)
+	print(ret.succeed,"======")
+	if ret.succeed then
 		self.room_mgr = room_mgr
-		self.seat = seat
+		self.seat = ret.seat
 	end
-	return succeed,seat,info,room_mgr
+	return {cmd="succeed_join",value=ret}
 
 end
 
 function M:toggle_ready()
-	print(self.room_mgr,"===========")
-	skynet.call(self.room_mgr ,"lua","seat_ready",self.seat)
-	--  self.ready,self.game_mgr =
-	-- print(self.ready,self.game_mgr,"=========+++++++++++")
+	if self.room_mgr then
+		succeed,gameservice = skynet.call(self.room_mgr ,"lua","toggle_ready",self.seat)
+		if succeed then
+			self.game_mgr = gameservice
+			print("gameservice",self.game_mgr)
+		end
+	end
+	print("gameservice",self.game_mgr)
 end
 
 function M:lose( p )
@@ -75,25 +85,31 @@ end
 
 
 --- 玩家对牌的操作
-function M:pass()
-	skynet.call(self.game_mgr,"lua","pass",self.seat)
+function M:pass(session)
+	skynet.call(self.game_mgr,"lua","pass",self.seat,session)
 end
 function M:pong(p,session)
 	skynet.call(self.game_mgr,"lua","pong",self.seat,p,session)
 end
-function M:gong(p,session)
-	skynet.call(self.game_mgr,"lua","gong",self.seat,p,session)
+function M:zhi_gong(p,session)
+	skynet.call(self.game_mgr,"lua","zhi_gong",self.seat,p,session)
 end
-function M:win(p,session)
-	skynet.call(self.game_mgr,"lua","win",self.seat,p,session)
+function M:hu(p,session)
+	skynet.call(self.game_mgr,"lua","hu",self.seat,p,session)
 end
 function M:throw(p,session)
 	skynet.call(self.game_mgr,"lua","throw",self.seat,p,session)
 end
 function M:set_discard(t ,session)
+	print("gameservice",self.game_mgr)
+	print("set_discard",self.game_mgr,t,session)
 	skynet.call(self.game_mgr,"lua","set_discard",self.seat,t,session)
 end
 
+function M:get_info()
+	print(name,seat)
+	return {user_id = name,seat =seat}
+end
 
 
 return M
