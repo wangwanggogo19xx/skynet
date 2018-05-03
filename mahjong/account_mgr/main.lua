@@ -7,6 +7,9 @@ local CMD = {}
 function CMD.login( username,password )
     return account_mgr:login(username,password)
 end
+function CMD.have_logined(username)
+    return account_mgr:exist(username)
+end
 
 
 skynet.start(function()
@@ -24,5 +27,6 @@ skynet.start(function()
         --     f(...)
         -- end
     end)
+    -- account_mgr:login("2015110433","123456")
     skynet.register("account_mgr")
 end)

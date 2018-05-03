@@ -31,7 +31,16 @@ end
 -- end
 
 function REQUEST.login(user)
-	local ret
+	-- local ret = skynet.call("account_mgr","lua","have_logined",user.username)
+	-- print(ret)
+	-- if ret then
+	-- 	player = p:new(skynet.self())
+	-- 	-- ret = {succeed=true,error=""}
+	-- 	sendRequest({succeed=true,error=""})
+	-- else
+	-- 	sendRequest({succeed=false,error="invalid username or password"})
+	-- 	skynet.exit()
+	-- end
 	if user.username == "1" and user.password == "1" then
 		player = p:new(skynet.self())
 		ret = {succeed=1,error=""}

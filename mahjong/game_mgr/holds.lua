@@ -191,12 +191,12 @@ function M:zhi_gong(p ,playerseat) --杠
 		self:remove(p)	
 		self:remove(p)	
 		self.gongs[p] = playerseat
-		return true
+		return true,"player_back_gong"
 	end
 
 	if self:count_p(p) == 1 then
 		self:remove(p)
-		return true
+		return true,"player_wan_gong"
 	end
 
 
@@ -205,7 +205,7 @@ function M:zhi_gong(p ,playerseat) --杠
 		self:remove(p)
 		self:remove(p)
 		self.gongs[p] = playerseat
-		return true
+		return true,"player_zhi_gong"
 	end
 	return false
 end

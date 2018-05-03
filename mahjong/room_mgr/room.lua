@@ -2,11 +2,12 @@ local skynet = require "skynet"
 local room_id_mgr = require "room_id_mgr"
 local M = {}
 
-function M:new(room_id)
+function M:new(room_id,no)
 	local o = {
 		-- player_mgrs = {false,false,false,false},
 		players={false,false,false,false},
 		id = room_id,
+		room_no =no,
 		gameservice = nil,
 	}
 	setmetatable(o,self)		
@@ -57,7 +58,16 @@ function M:add_player(player_mgr,player_id,seat)
 		return {succeed = false,seat=seat,room_mgr = self.id,info=info,players=self.players }
 	end	
 
+	
+
 	self.players[seat] = {player_mgr=player_mgr,seat = seat,player_id=player_id,status = 1}
+	
+
+	if self.players[1] and self.players[2] and self.players[3] and self.players[4] then
+		skynet.call("area_mgr","lua","set_unavailable",self.room_no)
+		print(self.room_no)
+	end	
+
 	-- 通知其余玩家，有玩家进入
 	local data = {cmd="player_join",value={seat=seat,user_id = player_id,seat_status=seat_status}}
 	self:notify_other_players(player_mgr,data)
@@ -94,6 +104,9 @@ function M:remove_player( seat )
 	local data = {cmd="player_leave",value={seat=seat}}
 	self:notify_other_players(self.players[seat].room_mgr,data)
 	self.players[seat] = false
+
+
+	skynet.call("area_mgr","lua","set_available",self.room_no)
 	return true
 end
 

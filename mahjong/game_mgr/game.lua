@@ -227,11 +227,9 @@ function M:zhi_gong(seat,p,session)
 		print(seat,"gong",p)
 		current_session =  current_session + 1
 		wakeup(true)
-		self.holds[seat]:zhi_gong(p,self.current_seat)
-
+		local succeed,type=self.holds[seat]:zhi_gong(p,self.current_seat)
 		print(self.holds)
-
-		self:notify_all_players({cmd="player_zhi_gong",value={seat=seat,p=p}})
+		self:notify_all_players({cmd="player_zhi_gong",value={seat=seat,p=p,type=type}})
 		
 		self:deal(seat) -- 摸一张牌
 
@@ -242,8 +240,8 @@ end
 
 function M:hu(seat,p,session)
 	if session == current_session then
+		current_session = current_session + 1
 		wakeup(true)
-
 		print(seat,"hu",current_card)
 
 		self.have_hu[seat] = {1}
@@ -252,19 +250,28 @@ function M:hu(seat,p,session)
 		self.current_seat = seat
 
 
-
-
-		if #self.have_hu == 3 then
+		local t = 0
+		for k,v in pairs(self.have_hu) do
+			t = t+1
+		end	
+		if t == 3 then
 			self:gameover()
 			return 
 		else
-			for k,v in pairs(self.have_hu) do
-				print(k,v,"====")
-			end
-			print("#self.have_hu[seat]", #self.have_hu[seat])
+			self:deal(self:next_seat())		
 		end
 
-		self:deal(self:next_seat())
+		-- if #self.have_hu == 3 then
+		-- 	self:gameover()
+		-- 	return 
+		-- else
+		-- 	for k,v in pairs(self.have_hu) do
+		-- 		print(k,v,"====")
+		-- 	end
+		-- 	print("#self.have_hu[seat]", #self.have_hu[seat])
+		-- end
+
+		-- self:deal(self:next_seat())
 	end	
 	
 end
@@ -335,12 +342,12 @@ end
 
 function M:gameover( )
 	print("gameover")
-	self:notify_all_players({cmd="gameove",value={}})
+	self:notify_all_players({cmd="gameover",value={}})
 	for k,v in pairs(self.have_hu) do
 		print(k,v,"====")
 	end	
 
-	skynet.exit()
+	-- skynet.exit()
 	-- body
 end
 

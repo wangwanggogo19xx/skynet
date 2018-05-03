@@ -3,6 +3,7 @@ require "skynet.manager"
 
 local r = require "room"
 local room 
+local room_no = ...
 
 -- local rooms = {}
 local CMD = {}
@@ -32,7 +33,7 @@ function CMD.remove_player( seat )
 	return room:remove_player(seat)
 end
 skynet.start(function()
-	room = r:new(skynet.self())
+	room = r:new(skynet.self(),room_no)
 
 	skynet.dispatch("lua",function (_, session, cmd, ...)
 		-- body
@@ -40,7 +41,7 @@ skynet.start(function()
 
 		skynet.ret(skynet.pack(f(...)))
 	end)
-	skynet.register("room_mgr")
+	-- skynet.register("room_mgr")
 end)
 
 

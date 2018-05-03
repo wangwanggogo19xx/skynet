@@ -53,13 +53,18 @@ function M:join_room(room_mgr,seat)
 	if not room_mgr then
 		room_mgr = skynet.call("area_mgr","lua","random_room")
 	end
-	local ret =  skynet.call(room_mgr ,"lua","add_player",self.agent,self.name,seat)
-	print(ret.succeed,"======")
-	if ret.succeed then
-		self.room_mgr = room_mgr
-		self.seat = ret.seat
+	if room_mgr then
+		local ret =  skynet.call(room_mgr ,"lua","add_player",self.agent,self.name,seat)
+		print(ret.succeed,"======")
+		if ret.succeed then
+			self.room_mgr = room_mgr
+			self.seat = ret.seat
+		end
+		return {cmd="succeed_join",value=ret}		
+	else
+		return {cmd="error_join",error_info = "无可用房间"}	
 	end
-	return {cmd="succeed_join",value=ret}
+	
 
 end
 
