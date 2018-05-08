@@ -21,8 +21,8 @@ local CMD = {}
 -- function CMD:( ... )
 -- 	-- body
 -- end
-function CMD.add_player(player_mgr,seat)
-	return room:add_player(player_mgr,seat)
+function CMD.add_player(userinfo,seat)
+	return room:add_player(userinfo,seat)
 
 end
 function CMD.toggle_ready(seat)
@@ -31,6 +31,14 @@ function CMD.toggle_ready(seat)
 end
 function CMD.remove_player( seat )
 	return room:remove_player(seat)
+end
+-- function CMD.toggle_ready(seat)
+-- 	-- skynet.yield()
+-- 	return room:toggle_ready(seat)
+-- end
+function CMD.gameover()
+	return room:gameover()
+	-- body
 end
 skynet.start(function()
 	room = r:new(skynet.self(),room_no)

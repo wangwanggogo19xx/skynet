@@ -7,10 +7,16 @@ local CMD = {}
 function CMD.login( username,password )
     return account_mgr:login(username,password)
 end
-function CMD.have_logined(username)
-    return account_mgr:exist(username)
+-- function CMD.have_logined(username)
+--     return account_mgr:exist(username)
+-- end
+function CMD.get_userinfo(accountname)
+    return account_mgr:get_userinfo(accountname)
+    -- body
 end
-
+function is_online(accountname)
+    return account_mgr:is_online(accountname)
+end
 
 skynet.start(function()
     account_mgr:init()

@@ -25,15 +25,18 @@ function M:login(username,password)
 			end
 		end
 		user = ret.value
+
 		self.online_account[username] = user
 	else
+
 		user = self.online_account[username]
 	end	
 	-- for k,v in pairs(user) do 
 	-- 	print(k,v)
 	-- end
+	print(self.online_account[username].username)
 	if user.password == password then
-		user.password= ""
+		-- user.password= ""
 		print("登录成功")
 
 		return {succeed=true,user = user}
@@ -55,7 +58,11 @@ function M:register(username,password)
 
 end
 
-function M:exist(username)
+function M:get_userinfo(username)
+	
+	return self.online_account[username] 
+end
+function M:is_online(accountname)
 	return self.online_account[username] ~= nil
 end
 

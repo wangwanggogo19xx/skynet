@@ -48,6 +48,14 @@ function GET.get_room_info(id,data )
     local ret = skynet.call(data.room_mgr,"get_room_info")
     -- response()
 end
+function GET.get_history_record(id,data)
+    for k,v in pairs(data) do
+        print(k,v)
+    end
+
+    local ret = skynet.call("mysql","lua","get_game_record",data.user_id,5)
+    response(id,200, ret)
+end
 
 local POST = {}
 

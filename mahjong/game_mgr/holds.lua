@@ -26,6 +26,7 @@ function M:new()
 		pongs = {},
 		gongs = {},
 		ting = {},
+
 	}
 	setmetatable(o,self)
 	self.__index = self	
@@ -95,10 +96,74 @@ end
 
 -- 	end
 -- end
+function M:is_qingyise()
+	local temp = {}
+	for i=1,#self.holds do
+		temp[i]= table_sum(self.holds[i])
+	end
+
+	for i=1,#self.pongs do
+		temp[self.pongs[i] // 10 + 1] = temp[self.pongs[i] //10 + 1] + 1
+	end
+	for i=1,#self.gongs do
+		temp[self.gongs[i] //10 + 1] = temp[self.gongs[i] //10 + 1] + 1
+	end	
+
+	local color_count = 0
+	for i=1,#temp do
+		if temp[i] > 0 then
+			color_count = color_count  + 1
+		end
+	end
+
+	if	color_count == 1 then
+		return true
+	end
+	return false
+end
+
+function M:get_hu_info( )
+	local times = 1
+	-- for k,v in pairs(self.hu_info) do
+	-- 	print(k,v)
+	-- end	
+	-- print("self.hu_info.pongponghu",self.hu_info.pongponghu)
+	-- print("self.hu_info.pinghu",self.hu_info.pinghu)
+
+	local gong_count = #self:have_gong()
+	for k,v in pairs(self.gongs) do
+		gong_count = gong_count + 1
+	end
+	times = times * 2^gong_count
+	self.hu_info.gong_count = gong_count
+
+
+	if self.hu_info.qidui then
+		times = times * 8
+	end
+
+
+	if self.hu_info.pongponghu then
+		times = times * 4
+	end
+
+	if self:is_qingyise() then
+		self.hu_info.qingyise = true
+		times = times * 4
+	end	
+	self.hu_info.times = times
+
+	return self.hu_info
+end
 
 -- 手牌是否胡牌
 function M:hu( )
-	return hu.huable(self.holds)
+	
+
+	local huable
+	huable,self.hu_info = hu.huable(self.holds)
+	
+	return huable
 end
 
 function M:remove( p )
@@ -139,6 +204,8 @@ function M:need(p)
 
 	if  self.ting[p] then
 		print("hu")
+		self.hu_info = self.ting[p]
+
 		table.insert(temp,"hu")
 	end
 
@@ -196,6 +263,7 @@ function M:zhi_gong(p ,playerseat) --杠
 
 	if self:count_p(p) == 1 then
 		self:remove(p)
+		self.gongs[p] = playerseat
 		return true,"player_wan_gong"
 	end
 

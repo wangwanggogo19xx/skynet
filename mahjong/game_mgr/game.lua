@@ -5,9 +5,11 @@ local M = {}
 
 
 local wait_count = 0
+local wait_time = 1000 -- 等待时间
+-- wait_time = 0.5 
 
 -- 当 current_session == wait_session 允许下一步，否则就等待，或者等待超时后执行下一步
-local current_session  = 0
+local current_session  = 1
 local current_card  -- 当前牌
 
 local task_thread
@@ -45,7 +47,7 @@ local function wait(count,sec,func,...)
 end
 
 
-function M:new(players,game_mgr)
+function M:new(players,game_mgr,room_mgr)
 	local o = {
 		mj = maghjong:new(),
 		players = players,
@@ -53,27 +55,37 @@ function M:new(players,game_mgr)
 		have_hu = {},
 		id = game_mgr,
 		current_seat,
+		result = {},
+		hu_count=0,
+		room_mgr = room_mgr,
 	}
 	setmetatable(o,self)		
 	self.__index = self	
 	math.randomseed(os.time()) 
 	return o
 end
+function M:player_leave(seat)
+	self.players[seat].active = false
+	-- body
+end
 
 function M:notify_player(player,data)
-	skynet.send(player.player_mgr,"lua","notify",data)
+	if player and player.active then
+		skynet.send(player.agent,"lua","notify",data)
+	end
 end
+
 function M:notify_other_players(player,data)
 	for i=1,#self.players do
-		if self.players[i] and not rawequal(player,self.players[i]) then
-			skynet.send(self.players[i].player_mgr,"lua","notify",data)
+		if self.players[i] and self.players[i].active and not rawequal(player,self.players[i]) then
+			skynet.send(self.players[i].agent,"lua","notify",data)
 		end
 	end		
 end
 function M:notify_all_players(data)
 	for i=1,#self.players do
-		if self.players[i] then
-			skynet.send(self.players[i].player_mgr,"lua","notify",data)
+		if self.players[i] and self.players[i].active then
+			skynet.send(self.players[i].agent,"lua","notify",data)
 		end
 	end		
 end
@@ -84,14 +96,14 @@ function M:start()
 	local data = {{value= self.id,attr="game_mgr"}}
 	for i=1,#self.players do
 		if self.players[i] then
-			skynet.call(self.players[i].player_mgr,"lua","set",data)
+			skynet.call(self.players[i].agent,"lua","set",data)
 		end
 	end		
 
 	-- 初始手牌
 	self:init_holds()
 	-- 等待定缺,超时随机定缺
-	wait(1,5,self.random_discard,self)
+	wait(1,2,self.random_discard,self)
 
 	-- 检测天胡
 	if self.holds[self.current_seat]:hu() then
@@ -103,7 +115,7 @@ function M:start()
 		-- end
 		self:notify_player(self.players[self.current_seat],data)
 	else
-		-- wait(1,1,self.random_throw,self,self.current_seat)
+		wait(1,wait_time,self.random_throw,self,self.current_seat)
 		-- print("出牌")
 		-- wait(1,self.random_throw,self,self.current_seat)
 	end
@@ -144,13 +156,13 @@ function M:deal(s)
 			option["hu"] = p
 		end
 		--  是否有暗杠
-		if #self.holds[seat].back_gong > 0 then
+		if #self.holds[seat].back_gong > 0 and self.mj.count > 0 then
 			print("暗杠============================")
 			option = option or {}
 			print(self.holds[seat].back_gong[1])
 			option["back_gang"] = self.holds[seat].back_gong
 		end
-		if #self.holds[seat]:have_gong() > 0 then
+		if #self.holds[seat]:have_gong() > 0 and self.mj.count > 0  then
 			option = option or {}
 			print("弯杠============================")
 			-- print(self.holds[seat].wan_gong[1])
@@ -166,7 +178,7 @@ function M:deal(s)
 
 		self:notify_other_players(self.players[seat],data)	
 
-		-- wait(1,10,self.random_throw,self,self.current_seat)
+		wait(1,wait_time,self.random_throw,self,self.current_seat)
 		return
 	else
 		self:deal(self:next_seat())	
@@ -230,9 +242,7 @@ function M:zhi_gong(seat,p,session)
 		local succeed,type=self.holds[seat]:zhi_gong(p,self.current_seat)
 		print(self.holds)
 		self:notify_all_players({cmd="player_zhi_gong",value={seat=seat,p=p,type=type}})
-		
 		self:deal(seat) -- 摸一张牌
-
 	else 
 		print("session has expired")
 	end	
@@ -242,19 +252,87 @@ function M:hu(seat,p,session)
 	if session == current_session then
 		current_session = current_session + 1
 		wakeup(true)
+		self.hu_count = self.hu_count + 1
+
 		print(seat,"hu",current_card)
+		local hu_info = self.holds[seat]:get_hu_info()
+		
+
+		if self.current_seat == seat then --自摸
+			hu_info.zimo = true
+			hu_info.times = hu_info.times * 2
+
+			-- 最大8番
+			if hu_info.times > 8 then
+				hu_info.times = 8
+			end		
+
+			local no_hu_count = 0
+			for i=1,#self.players do
+				if i ~=seat then
+					self.result[i] = self.result[i] or {}
+					if not self.have_hu[i] then
+						no_hu_count = no_hu_count + 1
+						local row = {}
+						row.seat = seat
+						row.info = hu_info
+						row.score = 0 - hu_info.times
+
+						table.insert(self.result[i],row)						
+					end
+				end
+			end
+
+			self.result[seat] = self.result[seat] or {}
+			local row = {}
+			row.seat = seat
+
+			row.info = hu_info
+			row.score =  hu_info.times * no_hu_count
+			table.insert(self.result[seat],row)			
+		else  --点炮
+			self.holds[seat]:add(p) --手牌中添加当前牌（判断是否胡在杠上）
+			-- 最大8番
+			if hu_info.times > 8 then
+				hu_info.times = 8
+			end		
+
+			hu_info.dianpao = true
+
+			self.result[seat] = self.result[seat] or {}
+			self.result[self.current_seat] = self.result[self.current_seat] or {}
+
+			local row = {}
+			row.seat = seat
+			row.info = hu_info
+			row.score = hu_info.times
+			table.insert(self.result[seat],row)
+			row = {}
+			row.seat = seat
+			row.info = hu_info
+			row.score = 0 - hu_info.times
+			table.insert(self.result[self.current_seat],row)
+
+		end
+		
+		for k,v in pairs(hu_info) do
+			print(k,v)
+		end
+
+
 
 		self.have_hu[seat] = {1}
-		local data = {cmd="player_hu",value={seat =seat,p=current_card}}
+
+		local data = {cmd="player_hu",value={seat =seat,p=current_card,hu_info=hu_info,result=self.result[seat]}}
 		self:notify_all_players(data)
 		self.current_seat = seat
 
 
-		local t = 0
-		for k,v in pairs(self.have_hu) do
-			t = t+1
-		end	
-		if t == 3 then
+		-- local t = 0
+		-- for k,v in pairs(self.have_hu) do
+		-- 	t = t+1
+		-- end	
+		if self.hu_count == 3 then
 			self:gameover()
 			return 
 		else
@@ -284,11 +362,12 @@ function M:throw(seat,p,session)
 
 		-- wakeup(true)
 
-		for i=1,4 do 
-			print("inform seat and throw",seat,p)
-			-- 通知其他玩家，当前玩家出牌：p
-			self:notify_player(self.players[i],{cmd = "player_throw",value={seat=seat,p = p}})
-		end
+		-- for i=1,4 do 
+		-- 	print("inform seat and throw",seat,p)
+		-- 	-- 通知其他玩家，当前玩家出牌：p
+		-- 	self:notify_player(self.players[i],{cmd = "player_throw",value={seat=seat,p = p}})
+		-- end
+		self:notify_all_players({cmd = "player_throw",value={seat=seat,p = p}})
 
 		local ok 
 
@@ -296,10 +375,18 @@ function M:throw(seat,p,session)
 		for i=1,4 do 
 			local need = self.holds[i]:need(p)
 			if  i ~= seat and not self.have_hu[i] and need then
-				for k,v in pairs(need) do
-					print(k,v)
-				end
+				-- for k,v in pairs(need) do
+				-- 	print(k,v)
+				-- end
 				--通知，并等待其他用户可进行的操作
+				if self.mj.count == 0 then
+					-- 没牌了，不能杠
+					for i=1,#need do
+						if need[i] == "gong" then
+							table.remove(need,i)
+						end
+					end
+				end
 				self:notify_player(self.players[i],{cmd="option",value={options = need,target_p =p},session=current_session})
 				table.insert(wait_player,i)
 				ok = true
@@ -307,7 +394,7 @@ function M:throw(seat,p,session)
 		end		
 		
 		if ok then
-			wait(#wait_player,1000,self.all_pass,self,wait_player,current_session)
+			wait(#wait_player,wait_time,self.all_pass,self,wait_player,current_session)
 		else
 			self:deal(self:next_seat())
 		end
@@ -340,12 +427,58 @@ function M:set_discard(seat,t,session)
 	end
 end
 
+function M:get_statistic()
+	local result = {}
+	for i=1,#self.players do
+		local sum = 0
+		if self.result[i] then
+			for j=1,#self.result[i] do
+				sum = sum + self.result[i][j].score
+			end
+		end
+		result[i] = {player_id = self.players[i].id,score = sum }
+		-- result[self.players[i].player_id] = sum
+		-- print(self.players[i].player_id,sum)		
+	end
+
+
+	-- for k,v in pairs(self.result) do
+	-- 	local sum = 0
+	-- 	for i=1,#self.result[k] do
+	-- 		sum = sum + self.result[k][i].score
+	-- 	end
+	-- 	result[self.players[k].player_id] = sum
+	-- 	print(self.players[k].player_id,sum)
+	-- end
+	
+	return result
+	-- body
+end
 function M:gameover( )
-	print("gameover")
-	self:notify_all_players({cmd="gameover",value={}})
-	for k,v in pairs(self.have_hu) do
-		print(k,v,"====")
-	end	
+	
+	if self.hu_count < 3 then
+		print("查叫")
+	end
+	local statistic = self:get_statistic()
+
+
+	skynet.call(self.room_mgr,"lua","gameover")
+	for i=1,#self.players do
+		if not self.have_hu[i] then
+			self:notify_player(self.players[i],{cmd="gameover",value={result=self.result[i]}})
+		else
+			self:notify_player(self.players[i],{cmd="gameover",value={}})
+		end
+	end
+
+
+	skynet.send("mysql","lua","save_result",statistic)
+
+	skynet.exit()
+	-- for k,v in pairs(self.have_hu) do
+	-- 	print(k,v,"====")
+	-- end	
+	-- self:notify_all_players({cmd="gameover",value={}})
 
 	-- skynet.exit()
 	-- body

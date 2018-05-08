@@ -47,11 +47,18 @@ function test_huable( )
 	-- }
 	-- print(huable(h))
 	h = {
-		{0,0,2,0,0,0,0,0,0},
-		{3,3,3,3,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0},
+		{0,0,2,0,0,0,0,2,0},
 		{0,0,0,0,0,0,0,0,0},
 	}
-	print(huable(h))	
+
+	local huable,types = hu.huable(h)
+	print(huable)
+	if type(types) == "table" then
+		for k,v in pairs(types) do
+			print(k,v)
+		end
+	end
 	-- body
 end
 -- test_huable()
@@ -64,9 +71,31 @@ function test_ting( )
 		{2,2,2,2,2,3,0,0,0},
 		{0,0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0,0},
+	}
+	h = {
+		{2,2,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0},
+		{0,0,0,0,0,0,0,0,0},
 	}	
 	local t = hu.get_ting(h)
-	print(t[1])
+	for k,v in pairs(t) do
+		print(k)
+		for m,n in pairs(v) do
+			print(m,n)
+		end
+	end
+
+	-- print(t[1])
+	-- for i=1,#t do 
+	-- 	print(t[i])
+
+	-- end
 	-- body
 end
 test_ting()
+-- function test()
+-- 	return true,1
+-- 	-- body
+-- end
+-- a = test()
+-- print(a)

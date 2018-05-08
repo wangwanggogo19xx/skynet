@@ -11,6 +11,8 @@ function copy_table(t)
 end
 
 local M = {}
+local has_shun = false
+
 local function get_first_pos( class )
 	local p  = 1
 	for i = 1,#class do
@@ -47,6 +49,8 @@ local function check_shun( class ,start)
 		class[start] = class[start] - 1
 		class[start + 1] = class[start + 1] - 1
 		class[start + 2] = class[start + 2] - 1
+
+		has_shun = true
 		return true
 	end
 	return false
@@ -66,6 +70,7 @@ local function check_rest(class)
 
 	local p = get_first_pos(class)
 	if p then
+
 		if class[p] < 3 then
 			if check_shun(class,p) then
 				return check_rest(class)
@@ -103,32 +108,68 @@ end
 
 
 
-local M = {}
-
-function M.huable(holds)	
-	if check_special(holds) then
+function che_qingyise(holds)
+	local count = 0
+	for i=1,#holds do
+		if get_first_pos(holds[i]) then 
+			count = count + 1 
+		end
+	end
+	if  count == 1 then
 		return true
 	end
+	return false
+end
 
-	local result 
+
+
+function M.huable(holds)
+	has_shun = false	
+	local result,types
+
+	if check_special(holds) then
+		-- return true,{qidui=true,qingyise = che_qingyise(holds)}
+		return true,{qidui=true}
+	end
+
 	for i=1,#holds do
 		local h  = copy_table(holds)
 		if get_first_pos(h[i]) then ---h[i] 花色有牌，可以胡该花色的牌，可以去将
 			result = true
+
+			
 			for j=1,#h do
 				if i ~= j then
 					result = result and check_rest(h[j])
 				end
 			end
+
 			if  result then
+				
+				local other_has_shun = has_shun --其他花色是否有顺
+
 				local t = copy_table(h[i])
 				for j=1,#t do
 					if del_jang(t,j) then
+						has_shun = false
+
+						-- has_shun = false
 						-- for k=1,#t do
 						-- 	print(t[k],"-----")
 						-- end
 						if check_rest(t) then
-							return true
+
+							if has_shun or other_has_shun then
+								print(has_shun,other_has_shun,"==============")
+								-- return true,{pinghu=true,qingyise = che_qingyise(holds)}
+								return true,{pinghu=true}
+							else
+								-- return true,{pongponghu=true,qingyise = che_qingyise(holds)}
+								return true,{pongponghu=true}
+							end
+
+
+							-- return true
 						end
 						t = copy_table(h[i]) 
 					end
@@ -140,18 +181,17 @@ function M.huable(holds)
 end 
 
 
+
 function M.get_ting(holds)
 	local temp = {}
 	for i =1,3 do
 		if get_first_pos(holds[i]) then
 			for j=1,9 do
 				holds[i][j] = holds[i][j] + 1
-				if M.huable(holds) then
-					temp[(i -1 )*10 + j] = 1
-					-- print("hu",(i -1 )*10 + j)
-
+				local huable,types = M.huable(holds)
+				if huable then
+					temp[(i -1 )*10 + j] = types
 				else
-					-- print("pass",(i -1 )*10 + j)
 				end
 				holds[i][j] = holds[i][j] - 1
 			end

@@ -1,3 +1,4 @@
+
 local skynet = require "skynet"
 local netpack = require "skynet.netpack"
 local socket = require "skynet.socket"
@@ -21,7 +22,10 @@ local ws
 
 local function sendRequest(data)
 	-- print("sendRequest")
-	skynet.call(WATCHDOG,"lua","notify",client_fd,data)
+	skynet.send(WATCHDOG,"lua","notify",client_fd,data)
+	-- local str = json:encode(data)
+ --    websocket.send_text(ws,str)
+ --    print("============")
 end
 
 -- function REQUEST:get()
@@ -30,22 +34,16 @@ end
 -- 	return { result = r }
 -- end
 
-function REQUEST.login(user)
-	-- local ret = skynet.call("account_mgr","lua","have_logined",user.username)
-	-- print(ret)
-	-- if ret then
-	-- 	player = p:new(skynet.self())
-	-- 	-- ret = {succeed=true,error=""}
-	-- 	sendRequest({succeed=true,error=""})
-	-- else
-	-- 	sendRequest({succeed=false,error="invalid username or password"})
-	-- 	skynet.exit()
-	-- end
-	if user.username == "1" and user.password == "1" then
-		player = p:new(skynet.self())
-		ret = {succeed=1,error=""}
+function REQUEST.login(accountname)
+	local userinfo = skynet.call("account_mgr","lua","get_userinfo",accountname)
+	
+	if userinfo then
+		userinfo.agent = skynet.self()
+
+		player = p:new(userinfo)
+		ret = {succeed=true,error=""}
 	else
-		ret =  {succeed=0,error="invalid username or password"}
+		ret =  {succeed=false,error="invalid username or password"}
 	end
 	sendRequest(ret)
 	return ret
@@ -56,7 +54,9 @@ function REQUEST.join_room(info)
 end
 
 function REQUEST.leave_room()
-	player:leave_room()
+	
+	sendRequest(player:leave_room())
+
 end
 function REQUEST.toggle_ready()
 	skynet.sleep(20)
@@ -70,6 +70,7 @@ function REQUEST.set_discard(data,session)
 end
 
 function REQUEST.throw(data,session)
+	print("REQUEST.throw")
 	player:throw(data.p,session)
 end
 function REQUEST.pong(data,session)
@@ -123,6 +124,9 @@ end
 function CMD.start(conf)
 	WATCHDOG = conf.watchdog
 	client_fd = conf.fd
+	print("start..................")
+	-- ws = conf.ws
+	-- REQUEST.login(conf.accountname)
 end
 
 function CMD.disconnect()
@@ -169,6 +173,10 @@ end
 function CMD.get_info()
 	-- print()
 	return player:get_info()
+end
+function CMD.gameover()
+	return player:gameover()
+	-- body
 end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)

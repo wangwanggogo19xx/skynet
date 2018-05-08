@@ -1,5 +1,5 @@
 local skynet = require "skynet"
-local room_id_mgr = require "room_id_mgr"
+
 local M = {}
 
 function M:new(room_id,no)
@@ -19,15 +19,15 @@ end
 function M:notify_all_player(data)
 	for i=1,#self.players do
 		if self.players[i] then
-			skynet.send(self.players[i].player_mgr,"lua","notify",data)	
+			skynet.send(self.players[i].agent,"lua","notify",data)	
 		end
 	end
 end
 
-function M:notify_other_players(player_mgr,data)
+function M:notify_other_players(player,data)
 	for i=1,#self.players do
-		if self.players[i] and not rawequal(player_mgr,self.players[i].player_mgr) then
-			skynet.send(self.players[i].player_mgr,"lua","notify",data)
+		if self.players[i] and not rawequal(self.players[i],player) then
+			skynet.send(self.players[i].agent,"lua","notify",data)
 		end
 	end		
 end
@@ -41,7 +41,7 @@ function M:empty()
 	return true
 end
 
-function M:add_player(player_mgr,player_id,seat)
+function M:add_player(userinfo,seat)
 	local succeed = true
 	local info = ""
 	if not seat then
@@ -58,19 +58,22 @@ function M:add_player(player_mgr,player_id,seat)
 		return {succeed = false,seat=seat,room_mgr = self.id,info=info,players=self.players }
 	end	
 
-	
-
-	self.players[seat] = {player_mgr=player_mgr,seat = seat,player_id=player_id,status = 1}
+	-- userinfo
+	userinfo.seat = seat
+	userinfo.status = 1
+	self.players[seat] = userinfo
+	self.players[seat].active = true
+	-- self.players[seat] = {player_mgr=player_mgr,seat = seat,player_id=player_id,status = 1}
 	
 
 	if self.players[1] and self.players[2] and self.players[3] and self.players[4] then
-		skynet.call("area_mgr","lua","set_unavailable",self.room_no)
+		skynet.send("area_mgr","lua","set_unavailable",self.room_no)
 		print(self.room_no)
 	end	
 
 	-- 通知其余玩家，有玩家进入
-	local data = {cmd="player_join",value={seat=seat,user_id = player_id,seat_status=seat_status}}
-	self:notify_other_players(player_mgr,data)
+	local data = {cmd="player_join",value=self.players[seat]}
+	self:notify_other_players(userinfo,data)
 	return {succeed = succeed,seat=seat,room_mgr = self.id,info=info,players=self.players }
 end
 
@@ -85,19 +88,39 @@ function M:toggle_ready(seat)
 
 	return self:start_new_game()
 end
+
 function M:start_new_game()
 	for i=1,#self.players do
 		if not self.players[i] or self.players[i].status ~= 2  then
+			print(i,"not ready")
 			return 
 		end
 	end
+
+	for i=1,#self.players do
+		self.players[i].status = 3
+	end		
 	self.gameservice = skynet.newservice("game_mgr");
 	local data = {cmd="new_game"}
 	print("new game")
 	self:notify_all_player(data)
-	skynet.send(self.gameservice,"lua","start",self.players)
+	skynet.send(self.gameservice,"lua","start",self.players,skynet.self())
 	return true,self.gameservice
 end
+
+
+function M:gameover()
+	for i=1,#self.players do
+		if self.players[i] then
+			self.players[i].status = 1
+		else
+			skynet.send("area_mgr","lua","set_available",self.room_no)
+		end
+	end	
+	self.gameservice = nil
+
+end
+
 
 function M:remove_player( seat )
 	
@@ -105,8 +128,12 @@ function M:remove_player( seat )
 	self:notify_other_players(self.players[seat].room_mgr,data)
 	self.players[seat] = false
 
-
-	skynet.call("area_mgr","lua","set_available",self.room_no)
+	if not self.gameservice then
+		-- print(self.gameservice,"=====")
+		skynet.send("area_mgr","lua","set_available",self.room_no)
+	else
+		skynet.send(self.gameservice,"lua","player_leave",seat)
+	end
 	return true
 end
 
@@ -121,7 +148,6 @@ function M:get_room_info()
 	-- end	
 	return temp
 end
-
 
 function M:__tostring()
 	return self.id..""

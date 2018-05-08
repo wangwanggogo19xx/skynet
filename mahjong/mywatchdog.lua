@@ -9,6 +9,7 @@ local json = require "json"
 
 local handler = {}
 local agent = {}
+local account = {}
 local wss = {}
 local M = {}
 
@@ -28,11 +29,26 @@ function handler.on_open(ws)
     agent[ws.id] = skynet.newservice("agent")
     wss[ws.id] = ws
     skynet.call(agent[ws.id],"lua","start",{fd = ws.id,watchdog = skynet.self()})
+     -- skynet.call(agent[ws.id],"lua","start",{fd = ws,watchdog = skynet.self()})
 end
 
 function handler.on_message(ws, message)
     print(message)
     local data = json:decode(message)
+    -- if data.cmd == "login" then
+    --     -- 该用户没有登录
+    --     if not account[data.accountname] then
+    --         local online = skynet.call("account_mgr","lua","is_online",accountname)
+    --         if online then
+    --             agent[ws.id] = skynet.newservice("agent")
+    --             account[data.accountname] = agent[ws.id]
+    --             wss[ws.id] = ws
+    --             skynet.call(agent[ws.id],"lua","start",{fd = ws.id,watchdog = skynet.self(),accountname =accountname})
+    --         end
+    --     end
+    -- else
+    --     skynet.send(agent[ws.id],"lua","dispatch",data)
+    -- end
     -- print(data.cmd,"data.cmd")
     skynet.send(agent[ws.id],"lua","dispatch",data)
 

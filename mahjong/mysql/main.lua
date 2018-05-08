@@ -71,7 +71,60 @@ function CMD.register(accountname,password)
 	-- end	
 	return temp
 end
+function CMD.save_result(result)
+	-- for i=1,4 do
+	-- 	print(result[1].player_id,result[1].score)
+	-- end
+	local time = os.time()
+	local sql = string.format("insert into game_record(player1,player1_score,\
+		player2,player2_score,\
+		player3,player3_score,\
+		player4,player4_score) \
+		values (%d,%d,%d,%d,%d,%d,%d,%d)",
+		result[1].player_id,result[1].score,
+		result[2].player_id,result[2].score,
+		result[3].player_id,result[3].score,
+		result[4].player_id,result[4].score
+		)
+	print(sql)
+	local res = db:query(sql)
 
+	for i=1,#result do
+		sql = string.format("update `user`  \
+			set score = score + %d \
+			where id = %d",result[i].score ,result[i].player_id)
+		print(sql)
+		db:query(sql)
+	end
+	 -- db:query(sql)
+
+	
+
+
+	-- body
+end
+
+function CMD.get_game_record(user_id,count)
+	local count = count or 5
+	local sql = string.format("select * \
+		from game_record \
+		where player1=%d or player2 = %d or player3= %d or player4 = %d \
+		order by `timestamp` desc limit 0,%d",
+		user_id,user_id,user_id,user_id,count)	
+	print(sql)
+	local res = db:query(sql)
+	res =dump(res)
+	local temp = {}
+	for j =1,#res do
+		for i=1,4 do
+			local key = string.format("player%d",i)
+			if  tonumber(res[j][key])== tonumber(user_id) then
+				table.insert(temp,{timestamp=res[j].timestamp,score=res[j][string.format(key.."_score")]})
+			end
+		end
+	end
+	return {succeed=true,value=temp}
+end
 
 function CMD.start()
 	local function on_connect(db)

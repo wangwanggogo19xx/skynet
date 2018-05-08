@@ -5,20 +5,23 @@ local g = require "game"
 local game 
 local CMD = {}
 
+-- local room_mgr = ...
 
 function CMD.start( ...)
-	local players = ...
+	local players,room_mgr = ...
 	for k,v in pairs(players) do
 		for a,b in pairs(v) do
 			print(a,b)
 		end
 	end
 	print(skynet.self())
-	game = g:new(players,skynet.self())
+	game = g:new(players,skynet.self(),room_mgr)
 	game:start()
 	-- body
 end
-
+function CMD.player_leave(seat)
+	game:player_leave(seat)
+end
 function CMD.pass(seat,session)
 	game:pass(seat,session)
 end
