@@ -41,9 +41,9 @@ function REQUEST.login(accountname)
 		userinfo.agent = skynet.self()
 
 		player = p:new(userinfo)
-		ret = {succeed=true,error=""}
+		ret = {cmd="login",value={succeed=true,error=""}}
 	else
-		ret =  {succeed=false,error="invalid username or password"}
+		ret =  {cmd="login",{succeed=false,error="invalid username or password"}}
 	end
 	sendRequest(ret)
 	return ret
@@ -88,7 +88,10 @@ function REQUEST.hu(data,session)
 	player:hu(data.p,session)
 	-- body
 end
-
+function REQUEST.send_msg(msg)
+	player:send_msg(msg)
+	-- body
+end
 function REQUEST:set()
 	-- print("get", self.what,self.value)
 	-- skynet.call(service,"lua",self.what,self.value)
@@ -124,15 +127,46 @@ end
 function CMD.start(conf)
 	WATCHDOG = conf.watchdog
 	client_fd = conf.fd
-	print("start..................")
-	-- ws = conf.ws
-	-- REQUEST.login(conf.accountname)
+	REQUEST.login(conf.accountname)
 end
+function CMD.reconnect()
+	print("reconnect")
+	local ret
+	local  ongaming = player:ongame()
+	if  ongaming then
 
+		print("on gaming")
+		player.active = true
+		local gameinfo = player:get_game_info()
+		player:reconnect()
+		ret = {cmd="reconnect",value=gameinfo}
+	else
+		print("not gaming")
+		player:leave_room()
+		ret = {cmd="login",value={succeed=true,error=""}}
+		
+	end
+	
+
+	sendRequest(ret)
+	-- body
+end
 function CMD.disconnect()
-	REQUEST.leave_room()
-	-- todo: do something before exit
-	skynet.exit()
+	if not player:ongame() then
+		local accountname = player:get_accountname()
+		-- print(accountname,"===========",WATCHDOG)
+		skynet.send(WATCHDOG,"lua","logout",accountname)
+		skynet.send("account_mgr","lua","logout",accountname)
+		player:leave_room()
+		print("断开连接")
+		-- todo: do something before exit
+		skynet.exit()
+	else
+
+		player.active = false
+		-- skynet.send()
+		print("waiting reconnect")
+	end
 end
 
 
@@ -178,10 +212,18 @@ function CMD.gameover()
 	return player:gameover()
 	-- body
 end
+function CMD.set_ws(fd)
+	-- print("before change"..client_fd)
+	-- print("after change"..fd)
+	client_fd = fd
+	-- body
+end
 skynet.start(function()
 	skynet.dispatch("lua", function(_,_, command, ...)
 		local f = CMD[command]
-		skynet.ret(skynet.pack(f(...)))
+		if f then
+			skynet.ret(skynet.pack(f(...)))
+		end
 	end)
 
 	-- print("agent starting")

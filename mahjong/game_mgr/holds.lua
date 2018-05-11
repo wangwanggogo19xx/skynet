@@ -18,7 +18,8 @@ function M:new()
 			{0,0,0,0,0,0,0,0,0}
 		},--手牌
 		lose_heap = {},-- 弃牌堆
-		init_holds_count = 13,--初始手牌数量
+		init_holds_count = 13,
+		holds_count = 0,--初始手牌数量
 		need_p = {}, --能够要其他玩家出的牌
 		back_gong = { }, --暗杠
 		wan_gong = { },
@@ -41,7 +42,7 @@ end
 function M:add(p)
 	local temp = self.holds[ p // 10+1]
 	temp[p % 10] = temp[p % 10] + 1
-
+	self.holds_count = self.holds_count + 1 
 	if self:count_p(p) == 4 then
 		table.insert(self.back_gong,p)
 	end
@@ -167,6 +168,8 @@ function M:hu( )
 end
 
 function M:remove( p )
+	self.holds_count = self.holds_count - 1 
+
 	local temp = self.holds[ p // 10+1]
 	temp[p % 10] = temp[p % 10] - 1	
 	for i=1,#self.back_gong do
@@ -334,4 +337,18 @@ function M:get_holds()
 	return holds
 end
 
+function M:get_info(show_holds)
+	local ret = {}
+	ret.holds_count = self.holds_count
+
+	if show_holds then
+		ret.holds = self:get_holds()
+	end
+
+	ret.discard = self.discard
+	ret.pongs = self.pongs
+	ret.gongs = self.gongs
+	ret.lose_heap = self.lose_heap
+	return ret
+end
 return M

@@ -14,8 +14,13 @@ function CMD.get_userinfo(accountname)
     return account_mgr:get_userinfo(accountname)
     -- body
 end
-function is_online(accountname)
+function CMD.is_online(accountname)
+
     return account_mgr:is_online(accountname)
+end
+function CMD.logout( accountname )
+    -- body
+    return account_mgr:remove(accountname)
 end
 
 skynet.start(function()
@@ -24,6 +29,7 @@ skynet.start(function()
     skynet.dispatch("lua", function(_, session, cmd, ...)
     	local f = CMD[cmd]
         if not f then
+            print("no cmd",cmd)
             return
         end
         skynet.ret(skynet.pack(f(...)))

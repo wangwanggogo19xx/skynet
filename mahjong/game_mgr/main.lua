@@ -19,8 +19,12 @@ function CMD.start( ...)
 	game:start()
 	-- body
 end
-function CMD.player_leave(seat)
-	game:player_leave(seat)
+function CMD.player_drop(seat)
+	game:player_drop(seat)
+end
+function CMD.reconnect(seat )
+	game:reconnect(seat)
+	-- body
 end
 function CMD.pass(seat,session)
 	game:pass(seat,session)
@@ -44,7 +48,10 @@ end
 function CMD.set_discard(seat,t,session)
 	game:set_discard(seat,t,session)
 end
-
+function CMD.get_info(seat)
+	return game:get_info(seat)
+	-- body
+end
 
 
 

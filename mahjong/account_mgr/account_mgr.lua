@@ -9,6 +9,7 @@ function M:init( )
 end
 
 function M:login(username,password)
+	print(username,password)
 	local user 
 	if not self.online_account[username] then
 
@@ -63,7 +64,10 @@ function M:get_userinfo(username)
 	return self.online_account[username] 
 end
 function M:is_online(accountname)
-	return self.online_account[username] ~= nil
+	return self.online_account[accountname] ~= nil
+end
+function M:remove(accountname)
+	self.online_account[accountname] = nil
 end
 
 return M

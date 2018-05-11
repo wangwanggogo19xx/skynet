@@ -12,6 +12,8 @@ function M:new(userinfo)
 		ready = false,
 		seat = nil,
 		game_mgr= nil,
+		ongaming=false,
+		active = true, --判断用户是否离线
 		-- send_request = host:attach(sprotoloader.load(2)),		
 	}
 
@@ -75,12 +77,25 @@ function M:toggle_ready()
 		succeed,gameservice = skynet.call(self.room_mgr ,"lua","toggle_ready",self.seat)
 		if succeed then
 			self.game_mgr = gameservice
+			self.ongaming = true
 			print("gameservice",self.game_mgr)
 		end
 	end
 	print("gameservice",self.game_mgr)
 end
-
+function M:get_game_info()
+	if self.game_mgr then
+		local ret = skynet.call(self.game_mgr,"lua","get_info",self.seat)
+		ret = {gameinfo = ret,my_seat = self.seat}
+		return ret
+	end
+	return
+	-- body
+end
+function M:ongame()
+	return self.game_mgr ~= nil
+	-- body
+end
 -- function M:lose( p )
 -- 	print(self.game_mgr,p)
 -- 	skynet.call(self.game_mgr,"lua","lose",self.seat,p)
@@ -103,22 +118,46 @@ function M:zhi_gong(p,session)
 end
 function M:hu(p,session)
 	skynet.send(self.game_mgr,"lua","hu",self.seat,p,session)
+	self.ongaming = false
 end
 function M:throw(p,session)
 	print(session,p,"=========");
 	skynet.send(self.game_mgr,"lua","throw",self.seat,p,session)
 end
+
+function M:send_msg(msg)
+	skynet.send(self.room_mgr,"lua","send_msg",self.seat,msg)
+	-- send_msg(msg)
+	-- body
+end
+
 function M:set_discard(t ,session)
 	print("gameservice",self.game_mgr)
 	print("set_discard",self.game_mgr,t,session)
 	skynet.send(self.game_mgr,"lua","set_discard",self.seat,t,session)
 end
--- function M:gameover()
--- 	self:toggle_ready()
--- end
+function M:gameover()
+	-- self:toggle_ready()
+	self.game_mgr = nil
+	self.ongaming = false
+	if not self.active then
+		skynet.send(self.userinfo.agent,"lua","disconnect" )
+		print("游戏结束，断开离线玩家")
+	end
+
+end
 function M:get_info()
 	print(name,seat)
 	return {user_id = name,seat =seat}
+end
+function M:get_accountname()
+	return self.userinfo.accountname
+	-- body
+end
+function M:reconnect()
+	self.active = true
+	skynet.send(self.game_mgr,"lua","reconnect",self.seat)
+	-- body
 end
 
 

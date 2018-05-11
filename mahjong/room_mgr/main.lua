@@ -32,13 +32,17 @@ end
 function CMD.remove_player( seat )
 	return room:remove_player(seat)
 end
--- function CMD.toggle_ready(seat)
--- 	-- skynet.yield()
--- 	return room:toggle_ready(seat)
--- end
+function CMD.ongaming()
+	-- skynet.yield()
+	return room:ongaming()
+end
+function CMD.send_msg(seat,msg)
+	room:player_send_msg(seat,msg)
+	-- body
+end
+
 function CMD.gameover()
 	return room:gameover()
-	-- body
 end
 skynet.start(function()
 	room = r:new(skynet.self(),room_no)

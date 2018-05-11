@@ -5,7 +5,7 @@ local M = {}
 
 
 local wait_count = 0
-local wait_time = 1000 -- 等待时间
+local wait_time = 20 -- 等待时间
 -- wait_time = 0.5 
 
 -- 当 current_session == wait_session 允许下一步，否则就等待，或者等待超时后执行下一步
@@ -64,8 +64,13 @@ function M:new(players,game_mgr,room_mgr)
 	math.randomseed(os.time()) 
 	return o
 end
-function M:player_leave(seat)
+function M:player_drop(seat)
 	self.players[seat].active = false
+	-- body
+end
+
+function M:reconnect( seat )
+	self.players[seat].active = true
 	-- body
 end
 
@@ -103,9 +108,9 @@ function M:start()
 	-- 初始手牌
 	self:init_holds()
 	-- 等待定缺,超时随机定缺
-	wait(1,2,self.random_discard,self)
+	wait(1,20,self.random_discard,self)
 
-	-- 检测天胡
+	-- 检测天胡,严重bug
 	if self.holds[self.current_seat]:hu() then
 		print("天胡")
 		current_session = current_session + 1
@@ -115,6 +120,9 @@ function M:start()
 		-- end
 		self:notify_player(self.players[self.current_seat],data)
 	else
+		-- self:notify_player(self.players[self.current_seat],{cmd="allow_throw",value={},session=current_session})
+		-- current_session = current_session + 1				
+
 		wait(1,wait_time,self.random_throw,self,self.current_seat)
 		-- print("出牌")
 		-- wait(1,self.random_throw,self,self.current_seat)
@@ -223,9 +231,13 @@ function M:pong(seat,p,session)
 		local data = {cmd="player_pong",value={seat=seat,p=p,chupai_seat=self.current_seat}}
 		self:notify_other_players(self.players[seat],data);
 
-		data.session =current_session
+		data.session = current_session
 		self.current_seat = seat
 		self:notify_player(self.players[seat],data)
+
+
+
+		wait(1,wait_time,self.random_throw,self,self.current_seat)
 
 
 	else 
@@ -259,6 +271,9 @@ function M:hu(seat,p,session)
 		
 
 		if self.current_seat == seat then --自摸
+			-- 自摸的时候手牌减一
+			self.holds[seat].holds_count = self.holds[seat].holds_count  - 1
+			
 			hu_info.zimo = true
 			hu_info.times = hu_info.times * 2
 
@@ -292,6 +307,7 @@ function M:hu(seat,p,session)
 			table.insert(self.result[seat],row)			
 		else  --点炮
 			self.holds[seat]:add(p) --手牌中添加当前牌（判断是否胡在杠上）
+			hu_info = self.holds[seat]:get_hu_info()
 			-- 最大8番
 			if hu_info.times > 8 then
 				hu_info.times = 8
@@ -356,11 +372,12 @@ end
 
 function M:throw(seat,p,session)
 	if current_session == session and self.holds[seat]:has_p(p) then
+		print(p)
 		current_session = current_session + 1
 		current_card = self.holds[seat]:throw(p)
 		self.current_seat = seat
 
-		-- wakeup(true)
+		wakeup(true)
 
 		-- for i=1,4 do 
 		-- 	print("inform seat and throw",seat,p)
@@ -411,15 +428,18 @@ function M:set_discard(seat,t,session)
 			if self.holds[seat]:set_discard(t)  then
 				local data = {cmd="set_discard",value={seat = seat,t = t}}
 				self:notify_all_players(data)
+				-- 
+				
 				for i=1,#self.holds do
 					if not self.holds[i].discard then
 						return
 					end
 				end
-				
+				-- current_session = current_session + 1
+				-- self:notify_player(self.players[self.current_seat],{cmd="allow_throw"},session=current_session)
 				-- current_session = current_session + 1
 				print("all player have set discard")
-				-- wakeup()
+				wakeup()
 			end	
 		end
 	else
@@ -490,13 +510,16 @@ function M:pass(seat,session)
 		self:notify_player(self.players[seat],{cmd="pass"})
 		wakeup()
 
-		if seat ~= self.current_seat then
-			if wait_count == 0 then
+		if wait_count== 0 then
+			if seat ~= self.current_seat then
+				-- if wait_count == 0 then
 				print("active")
 				self:deal(self:next_seat())
-			end			
-		else
-
+				-- end			
+			else
+				-- 随机出牌
+				-- wait(1,wait_time,self.random_throw,self,self.current_seat)
+			end
 		end
 
 		
@@ -504,6 +527,22 @@ function M:pass(seat,session)
 		print("session has expired")
 	end
 end
+
+function M:get_info(seat)
+	local temp = {}
+	for i=1,#self.holds do
+		temp[i] = {}
+		-- local show_holds = (seat == i)
+		temp[i].holdsinfo = self.holds[i]:get_info(seat == i)
+		temp[i].playerinfo = self.players[i]
+		temp[i].seat = i
+	end
+	-- local ret = {players=self.players,holdsinfo = temp}
+	return temp
+	-- body
+end
+
+
 
 function M.random_discard(game)
 	for j = 1,4 do

@@ -55,10 +55,9 @@ function CMD.register(accountname,password)
 	-- print("dir=", path) 
 
 
-
 	-- local str="python --version"
-	str = string.format("python3 %s/../labSystem/officeOfAcdemic/mahjong_login.py %s %s",path,accountname,password)
-	-- print(str)
+	str = string.format("python3 %s/../labSystem/officeOfAcdemic/mahjong_login.py '%s' '%s'",path,accountname,password)
+	print(str)
 	local t = io.popen(str)
 	local a = t:read("*all")
 	local temp = {}

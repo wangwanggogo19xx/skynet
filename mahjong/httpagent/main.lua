@@ -17,9 +17,13 @@ local function response(id, code, msg, ...)
 end
 
 local function decode_body( body )
+    --解析有问题
 	local data = {}
 	if body then
-		for k,v in string.gmatch(body, "(%w+)=(%w+)") do
+		for k,v in string.gmatch(body, "(%w+)=(%x+)") do
+        -- username=2014110641&password=txx960904#
+        -- for k,v in string.gmatch(body, "username=(%d+)&password=(%x+)") do
+            print(k,v)
 		    data[k]=v
 		end
 	end	
@@ -71,6 +75,7 @@ local function handle(id)
     -- limit request body size to 8192 (you can pass nil to unlimit)
     local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 128)
     print(code, url, body)
+   
 
     if not code or code ~= 200 then
         return

@@ -27,7 +27,7 @@ end
 skynet.start(function()
 
 	-- 生成5个房间
-	for i=1,5 do
+	for i=1,15 do
 		-- rooms[i]=skynet.newservice("room_mgr")
 		rooms[i] = {room_mgr=skynet.newservice("room_mgr",i),available=true}
 	end

@@ -9,6 +9,7 @@ function M:new(room_id,no)
 		id = room_id,
 		room_no =no,
 		gameservice = nil,
+		-- gaming = false,
 	}
 	setmetatable(o,self)		
 	self.__index = self	
@@ -107,17 +108,24 @@ function M:start_new_game()
 	skynet.send(self.gameservice,"lua","start",self.players,skynet.self())
 	return true,self.gameservice
 end
-
+-- function CMD:ongaming()
+-- 	return self.gameservice == nil
+-- 	-- body
+-- end
 
 function M:gameover()
+	self.gameservice = nil
 	for i=1,#self.players do
+		
 		if self.players[i] then
+			skynet.send(self.players[i].agent,"lua","gameover")
 			self.players[i].status = 1
 		else
 			skynet.send("area_mgr","lua","set_available",self.room_no)
 		end
 	end	
-	self.gameservice = nil
+	
+
 
 end
 
@@ -132,9 +140,13 @@ function M:remove_player( seat )
 		-- print(self.gameservice,"=====")
 		skynet.send("area_mgr","lua","set_available",self.room_no)
 	else
-		skynet.send(self.gameservice,"lua","player_leave",seat)
+		-- skynet.send(self.gameservice,"lua","player_drop",seat)
 	end
 	return true
+end
+function M:reconnect(seat)
+	skynet.send(self.gameservice,"lua","reconnect",seat)
+	-- body
 end
 
 function M:get_room_info()
@@ -149,6 +161,9 @@ function M:get_room_info()
 	return temp
 end
 
+function M:player_send_msg(seat,msg)
+	self:notify_all_player({cmd="get_msg",value={seat=seat,msg=msg}})
+end
 function M:__tostring()
 	return self.id..""
 end
