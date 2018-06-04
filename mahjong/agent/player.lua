@@ -85,8 +85,8 @@ function M:toggle_ready()
 end
 function M:get_game_info()
 	if self.game_mgr then
-		local ret = skynet.call(self.game_mgr,"lua","get_info",self.seat)
-		ret = {gameinfo = ret,my_seat = self.seat}
+		local ret,rest_count = skynet.call(self.game_mgr,"lua","get_info",self.seat)
+		ret = {gameinfo = ret,my_seat = self.seat,rest_count=rest_count}
 		return ret
 	end
 	return

@@ -9,10 +9,8 @@ function copy_table(t)
 	end
 	return h
 end
-
 local M = {}
 local has_shun = false
-
 local function get_first_pos( class )
 	local p  = 1
 	for i = 1,#class do
@@ -26,8 +24,6 @@ local function get_first_pos( class )
 	end
 	return p
 end
-
-
 -- 胡牌时必存在一对将牌，删除可能的将牌
 function del_jang(class,p)
 	-- print(class[p])
@@ -37,9 +33,6 @@ function del_jang(class,p)
 	end
 	return false
 end
-
-
-
 
 local function check_shun( class ,start)
 	if start >7 then
@@ -105,9 +98,6 @@ function check_special(holds)
 	return false
 end
 
-
-
-
 function che_qingyise(holds)
 	local count = 0
 	for i=1,#holds do
@@ -120,8 +110,6 @@ function che_qingyise(holds)
 	end
 	return false
 end
-
-
 
 function M.huable(holds)
 	has_shun = false	
@@ -179,8 +167,6 @@ function M.huable(holds)
 	end
 	return false
 end 
-
-
 
 function M.get_ting(holds)
 	local temp = {}

@@ -89,6 +89,9 @@ function REQUEST.hu(data,session)
 	-- body
 end
 function REQUEST.send_msg(msg)
+	for k,v in pairs(msg) do
+		print(k,v)
+	end
 	player:send_msg(msg)
 	-- body
 end

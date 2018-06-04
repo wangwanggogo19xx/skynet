@@ -66,6 +66,7 @@ function M:new(players,game_mgr,room_mgr)
 end
 function M:player_drop(seat)
 	self.players[seat].active = false
+	-- self.players[seat] = false
 	-- body
 end
 
@@ -538,7 +539,7 @@ function M:get_info(seat)
 		temp[i].seat = i
 	end
 	-- local ret = {players=self.players,holdsinfo = temp}
-	return temp
+	return temp,self.mj.count
 	-- body
 end
 

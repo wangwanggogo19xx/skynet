@@ -140,7 +140,7 @@ function M:remove_player( seat )
 		-- print(self.gameservice,"=====")
 		skynet.send("area_mgr","lua","set_available",self.room_no)
 	else
-		-- skynet.send(self.gameservice,"lua","player_drop",seat)
+		skynet.send(self.gameservice,"lua","player_drop",seat)
 	end
 	return true
 end

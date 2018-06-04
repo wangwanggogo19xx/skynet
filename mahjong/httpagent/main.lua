@@ -20,7 +20,7 @@ local function decode_body( body )
     --解析有问题
 	local data = {}
 	if body then
-		for k,v in string.gmatch(body, "(%w+)=(%x+)") do
+		for k,v in string.gmatch(body, "(%w+)=(%w+)") do
         -- username=2014110641&password=txx960904#
         -- for k,v in string.gmatch(body, "username=(%d+)&password=(%x+)") do
             print(k,v)
