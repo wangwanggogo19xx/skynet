@@ -6,6 +6,6 @@ lua_cpath = root .. "luaclib/?.so"
 snax = root.."examples/?.lua;"..root.."test/?.lua"
 
 --our service
-luaservice = root.."mahjong/?.lua;"..root.."mahjong/?/main.lua;"..luaservice
+luaservice = root.."mahjong/?.lua;"..root.."mahjong/?/main.lua;"..root.."mahjong/test/?.lua;"..luaservice
 lua_path = root.."mahjong/?/?.lua;"..root.."mahjong/?.lua;"..lua_path
 lua_cpath = root .. "lualib/?.so;"..lua_cpath

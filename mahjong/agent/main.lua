@@ -22,7 +22,9 @@ local ws
 
 local function sendRequest(data)
 	-- print("sendRequest")
-	skynet.send(WATCHDOG,"lua","notify",client_fd,data)
+	if client_fd then
+		skynet.send(WATCHDOG,"lua","notify",client_fd,data)
+	end
 	-- local str = json:encode(data)
  --    websocket.send_text(ws,str)
  --    print("============")
@@ -35,9 +37,11 @@ end
 -- end
 
 function REQUEST.login(accountname)
+	print(accountname)
 	local userinfo = skynet.call("account_mgr","lua","get_userinfo",accountname)
-	
+	-- print(userinfo.."==="..accountname)
 	if userinfo then
+		print("==========")
 		userinfo.agent = skynet.self()
 
 		player = p:new(userinfo)
@@ -48,7 +52,18 @@ function REQUEST.login(accountname)
 	sendRequest(ret)
 	return ret
 end
+
+-- function REQUEST.test_login()
+-- 	userinfo.agent = skynet.self()
+-- 	player = p:new(userinfo)
+-- 	ret = {cmd="login",value={succeed=true,error=""}}
+-- 	return ret
+-- end
+
+
 function REQUEST.join_room(info)
+	info = info or {room_id=nil,seat=nil}
+	print(player)
 	local ret = player:join_room(info.room_id,info.seat)
 	sendRequest(ret)
 end

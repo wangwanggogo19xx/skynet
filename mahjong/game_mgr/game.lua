@@ -6,7 +6,7 @@ local M = {}
 
 local wait_count = 0
 local wait_time = 20 -- 等待时间
--- wait_time = 0.5 
+wait_time = 0.5 
 
 -- 当 current_session == wait_session 允许下一步，否则就等待，或者等待超时后执行下一步
 local current_session  = 1
