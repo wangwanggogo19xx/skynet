@@ -38,7 +38,7 @@ function handler.on_message(ws, message)
 
     local data = json:decode(message)
     print(data.cmd,"data.cmd")
-    print(data.cmd == "login")
+    
     if data.cmd == "login" then
         -- 该用户没有登录
         print(account[data.value])
