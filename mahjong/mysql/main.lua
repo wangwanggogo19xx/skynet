@@ -93,6 +93,7 @@ function CMD.save_result(result)
 			set score = score + %d \
 			where id = %d",result[i].score ,result[i].player_id)
 		print(sql)
+		-- mysql.quote_sql_str(str) 去除str中的特殊字符
 		db:query(sql)
 	end
 	 -- db:query(sql)

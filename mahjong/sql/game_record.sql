@@ -10,7 +10,7 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "+08:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -41,6 +41,22 @@ CREATE TABLE `game_record` (
   `player4_score` smallint(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- CREATE TABLE `game_record` (
+--   `id` smallint(6) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+--   `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `player1` smallint(6) NOT NULL,
+--   `player1_score` smallint(6) NOT NULL,
+--   `player2` smallint(6) NOT NULL,
+--   `player2_score` smallint(6) NOT NULL,
+--   `player3` smallint(6) NOT NULL,
+--   `player3_score` smallint(6) NOT NULL,
+--   `player4` smallint(6) NOT NULL,
+--   `player4_score` smallint(6) NOT NULL,
+--   FOREIGN KEY (`player1`) REFERENCES `user` (`id`),
+--   FOREIGN KEY (`player2`) REFERENCES `user` (`id`),
+--   FOREIGN KEY (`player3`) REFERENCES `user` (`id`),
+--   FOREIGN KEY (`player4`) REFERENCES `user` (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 --
 -- 转存表中的数据 `game_record`
 --

@@ -10,7 +10,7 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
-SET time_zone = "+00:00";
+SET time_zone = "+08:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -28,15 +28,22 @@ SET time_zone = "+00:00";
 -- 表的结构 `user`
 --
 
+-- CREATE TABLE `user` (
+--   `id` smallint(6) NOT NULL AUTO_INCREMENT,
+--   `accountname` char(11) NOT NULL,
+--   `password` varchar(255) NOT NULL,
+--   `username` varchar(255) NOT NULL,
+--   `headimg` varchar(255) NOT NULL,
+--   `score` smallint(6) DEFAULT '0'
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE TABLE `user` (
-  `id` smallint(6) NOT NULL AUTO_INCREMENT,
-  `accountname` char(11) NOT NULL,
+  `id` smallint(6) primary key NOT NULL AUTO_INCREMENT,
+  `accountname` char(11) NOT NULL UNIQUE,
   `password` varchar(255) NOT NULL,
   `username` varchar(255) NOT NULL,
   `headimg` varchar(255) NOT NULL,
   `score` smallint(6) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 --
 -- 转存表中的数据 `user`
 --
